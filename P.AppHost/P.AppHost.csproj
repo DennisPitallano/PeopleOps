@@ -11,6 +11,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\P.ApiService\P.ApiService.csproj" />
+    <ProjectReference Include="..\P.HumanResource.Web\P.HumanResource.Web.csproj" />
     <ProjectReference Include="..\P.Web\P.Web.csproj" />
   </ItemGroup>
 

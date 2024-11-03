@@ -6,4 +6,6 @@ builder.AddProject<Projects.P_Web>("webfrontend")
     .WithExternalHttpEndpoints()
     .WithReference(apiService);
 
+builder.AddProject<Projects.P_HumanResource_Web>("p-humanresource-web");
+
 builder.Build().Run();
