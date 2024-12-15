@@ -8,4 +8,6 @@ builder.AddProject<Projects.P_Web>("webfrontend")
 
 builder.AddProject<Projects.P_HumanResource_Web>("p-humanresource-web");
 
+builder.AddProject<Projects.ThankUApp>("thankuapp");
+
 builder.Build().Run();
