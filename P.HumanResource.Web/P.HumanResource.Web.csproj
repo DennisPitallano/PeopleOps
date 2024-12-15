@@ -14,4 +14,8 @@
   <ItemGroup>
     <ProjectReference Include="..\P.ServiceDefaults\P.ServiceDefaults.csproj" />
   </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="wwwroot\assets\media\images\" />
+  </ItemGroup>
 </Project>
