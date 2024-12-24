@@ -1,7 +1,7 @@
 ﻿using Supabase.Postgrest.Attributes;
 using Supabase.Postgrest.Models;
 
-namespace PeopleOps.Web.Components.Pages.Profiles.Contract;
+namespace PeopleOps.Web.Tables;
 
 [Table("profiles")]
 public class ProfileTable: BaseModel

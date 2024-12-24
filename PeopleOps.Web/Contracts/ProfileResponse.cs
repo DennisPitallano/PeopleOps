@@ -1,4 +1,4 @@
-﻿namespace PeopleOps.Web.Components.Pages.Profiles.Contract;
+﻿namespace PeopleOps.Web.Contracts;
 
 public class ProfileResponse
 {

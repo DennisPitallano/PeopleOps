@@ -1,7 +1,9 @@
 ﻿using MediatR;
+using PeopleOps.Web.Contracts;
+using PeopleOps.Web.Tables;
 using Supabase;
 
-namespace PeopleOps.Web.Components.Pages.Profiles.Contract;
+namespace PeopleOps.Web.Components.Pages.Profiles;
 
 public static class GetProfile
 {

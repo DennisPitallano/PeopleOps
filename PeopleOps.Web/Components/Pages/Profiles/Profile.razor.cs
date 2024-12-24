@@ -1,19 +1,15 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Components;
-using PeopleOps.Web.Components.Pages.Profiles.Contract;
+using PeopleOps.Web.Contracts;
 
 namespace PeopleOps.Web.Components.Pages.Profiles;
 
 
 public partial class Profile : ComponentBase
 {
-    //inject ISender from MediatR
     [Inject]
     private ISender Sender { get; set; }
 
-    [Inject] 
-    private IMediator Mediator { get; set; }
-    
     private ProfileResponse? ProfileResponse { get; set; }
 
     protected override async Task OnInitializedAsync()
