@@ -16,10 +16,10 @@ public class AttendanceTable : BaseModel
     public long ProfileId { get; set; }
     
     [Column("time_in")]
-    public DateTime TimeIn { get; set; }
+    public DateTime? TimeIn { get; set; }
     
     [Column("time_out")]    
-    public DateTime TimeOut { get; set; }
+    public DateTime? TimeOut { get; set; }
     
     [Column("activity_date")]
     public DateTime ActivityDate { get; set; }

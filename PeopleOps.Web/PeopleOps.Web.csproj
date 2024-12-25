@@ -9,6 +9,7 @@
   <ItemGroup>
     <PackageReference Include="Mapster" Version="7.4.0" />
     <PackageReference Include="MediatR" Version="12.4.1" />
+    <PackageReference Include="Microsoft.FluentUI.AspNetCore.Components.Emoji" Version="4.11.0" />
     <PackageReference Include="Supabase" Version="1.1.1" />
     <ProjectReference Include="..\PeopleOps.ServiceDefaults\PeopleOps.ServiceDefaults.csproj" />
     <PackageReference Include="Microsoft.FluentUI.AspNetCore.Components" Version="4.11.0" />

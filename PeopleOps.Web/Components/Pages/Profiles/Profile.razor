@@ -16,7 +16,7 @@
                            StatusSize="PresenceBadgeSize.Large"
                            StatusTitle="He is available"
                            Image="https://avatars.githubusercontent.com/u/3394208?v=4e"
-                           ImageSize="100px" DismissTitle="Dismess">
+                           ImageSize="100px">
             </FluentPersona>
         </div>
         <div>
@@ -129,7 +129,6 @@
                         </FluentGridItem>
                         <FluentGridItem>
 
-
                         </FluentGridItem>
                     </FluentGrid>
                 </FluentTab>
@@ -192,13 +191,16 @@
         DialogParameters parameters = new()
         {
             Title = $"Hello {simplePerson.FirstName}",
-            PrimaryAction = "Yes",
-            PrimaryActionEnabled = false,
-            SecondaryAction = "No",
-            Width = "500px",
             TrapFocus = _trapFocus,
             Modal = _modal,
-            PreventScroll = true 
+            PreventScroll = true,
+            PreventDismissOnOverlayClick = true,
+            ShowTitle = false,
+            ShowDismiss = false,
+            Alignment = HorizontalAlignment.Center,
+            PrimaryAction = "",
+            SecondaryAction = "Close",
+            Width = "500px"
         };
 
         IDialogReference dialog = await DialogService.ShowDialogAsync<TaskCenterModal>(simplePerson, parameters);
