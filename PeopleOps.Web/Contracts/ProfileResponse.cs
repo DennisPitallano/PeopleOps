@@ -16,5 +16,9 @@ public class ProfileResponse
     
     public string Email { get; set; }
 
+    public string JobTitle { get; set; }
+    
+    public string CityAddress { get; set; }
+
     public string FullName => $"{FirstName} {LastName}";
 }

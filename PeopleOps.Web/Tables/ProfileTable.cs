@@ -27,4 +27,10 @@ public class ProfileTable: BaseModel
     [Column("email")]
     public string Email { get; set; }
     
+    [Column("job_title")]
+    public string JobTitle { get; set; }
+    
+    [Column("city_address")]
+    public string CityAddress { get; set; }
+    
 }

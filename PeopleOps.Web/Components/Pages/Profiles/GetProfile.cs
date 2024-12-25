@@ -22,8 +22,8 @@ public static class GetProfile
             var profiles = await supabaseClient.From<ProfileTable>()
                 .Where(p => p.Id == request.Id)
                 .Get(cancellationToken).ConfigureAwait(false);
-            var profile =  profiles.Models.Single();
-            
+            var profile = profiles.Models.Single();
+
             return new ProfileResponse
             {
                 Id = profile.Id,
@@ -32,9 +32,10 @@ public static class GetProfile
                 LastName = profile.LastName,
                 DateOfBirth = profile.DateOfBirth,
                 Email = profile.Email,
-                Gender = profile.Gender
+                Gender = profile.Gender,
+                JobTitle = profile.JobTitle,
+                CityAddress = profile.CityAddress
             };
         }
     }
-   
 }
