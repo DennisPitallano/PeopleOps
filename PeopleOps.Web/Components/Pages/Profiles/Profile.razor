@@ -191,7 +191,7 @@
         DialogParameters parameters = new()
         {
             Title = $"Hello {simplePerson.FirstName}",
-            TrapFocus = _trapFocus,
+            TrapFocus = false,
             Modal = _modal,
             PreventScroll = true,
             PreventDismissOnOverlayClick = true,
@@ -200,7 +200,7 @@
             Alignment = HorizontalAlignment.Center,
             PrimaryAction = "",
             SecondaryAction = "Close",
-            Width = "500px"
+            Width = "500px",
         };
 
         IDialogReference dialog = await DialogService.ShowDialogAsync<TaskCenterModal>(simplePerson, parameters);

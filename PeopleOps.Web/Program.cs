@@ -1,6 +1,7 @@
 using PeopleOps.Web;
 using PeopleOps.Web.Components;
 using Microsoft.FluentUI.AspNetCore.Components;
+using Microsoft.FluentUI.AspNetCore.Components.Components.Tooltip;
 using Supabase;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -31,6 +32,7 @@ var options = new SupabaseOptions
 // Note the creation as a singleton.
 builder.Services.AddSingleton(_ => new Client(url, key, options));
 
+builder.Services.AddScoped<ITooltipService, TooltipService>();
 
 builder.Services.AddHttpClient<WeatherApiClient>(client =>
     {

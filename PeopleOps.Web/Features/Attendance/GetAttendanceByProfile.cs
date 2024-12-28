@@ -31,7 +31,7 @@ public static class GetAttendanceByProfile
                 ProfileId = attendance.ProfileId,
                 TimeIn = attendance.TimeIn,
                 TimeOut = attendance.TimeOut
-            }).ToList();
+            }).OrderBy(d=>d.ActivityDate).ToList();
         }
     }
     
