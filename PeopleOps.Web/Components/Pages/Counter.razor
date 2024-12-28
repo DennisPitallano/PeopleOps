@@ -1,6 +1,7 @@
 ﻿@page "/counter"
+@using PeopleOps.Web.Services
 @rendermode InteractiveServer
-
+@inject IEmailService EmailService
 <PageTitle>Counter</PageTitle>
 
 <h1>Counter</h1>
@@ -14,8 +15,20 @@
 @code {
     private int currentCount = 0;
 
-    private void IncrementCount()
+    private async Task IncrementCount()
     {
+        await EmailService.SendEmailAsync("dpitallano@gmail.com;" +
+                                          "jefferson.delacruz@agiletechops.com;" +
+                                          "dennis.pitallano@agiletechops.com" +
+                                          ";gabriel.cabrera@agiletechops.com;" +
+                                          "mira.marcos@agiletechops.com;" +
+                                          "dave.nivera@agiletechops.com;" +
+                                          "roxanne.luna@agiletechops.com;" +
+                                          "marino.baria@agiletechops.com;" +
+                                          "paul.parinas@agiletechops.com;" +
+                                          "christian.baldeo@agiletechops.com;" +
+                                          "bill.duque@agiletechops.com", "Complete 1 card", $"Current count: {currentCount}");
+        
         currentCount++;
     }
 }

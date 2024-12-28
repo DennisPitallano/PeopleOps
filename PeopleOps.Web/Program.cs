@@ -1,7 +1,10 @@
+using Hangfire;
+using Hangfire.MemoryStorage;
 using PeopleOps.Web;
 using PeopleOps.Web.Components;
 using Microsoft.FluentUI.AspNetCore.Components;
 using Microsoft.FluentUI.AspNetCore.Components.Components.Tooltip;
+using PeopleOps.Web.Services;
 using Supabase;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -41,7 +44,23 @@ builder.Services.AddHttpClient<WeatherApiClient>(client =>
         client.BaseAddress = new("https+http://apiservice");
     });
 
+builder.Services.AddHangfire(config =>
+{
+    config.SetDataCompatibilityLevel(CompatibilityLevel.Version_180)
+        .UseSimpleAssemblyNameTypeSerializer()
+        .UseRecommendedSerializerSettings()
+        .UseMemoryStorage();
+    
+});
+
+builder.Services.AddHangfireServer();
+
+builder.Services.Configure<EmailSetting>(builder.Configuration.GetSection("FluentMail"));
+builder.Services.AddScoped<IEmailService, EmailService>();
+
 var app = builder.Build();
+
+app.UseHangfireDashboard("/hangfire");
 
 if (!app.Environment.IsDevelopment())
 {
