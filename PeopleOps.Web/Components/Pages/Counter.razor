@@ -1,6 +1,9 @@
 ﻿@page "/counter"
 @using PeopleOps.Web.Services
+@using Supabase.Gotrue
+@using Client = Supabase.Client
 @rendermode InteractiveServer
+@inject Client supabase
 @inject IEmailService EmailService
 <PageTitle>Counter</PageTitle>
 
@@ -17,7 +20,9 @@
 
     private async Task IncrementCount()
     {
-        await EmailService.SendEmailAsync("dpitallano@gmail.com;" +
+        var signInUrl = supabase.Auth.SignIn(Constants.Provider.Google);
+
+        /*await EmailService.SendEmailAsync("dpitallano@gmail.com;" +
                                           "jefferson.delacruz@agiletechops.com;" +
                                           "dennis.pitallano@agiletechops.com" +
                                           ";gabriel.cabrera@agiletechops.com;" +
@@ -27,7 +32,7 @@
                                           "marino.baria@agiletechops.com;" +
                                           "paul.parinas@agiletechops.com;" +
                                           "christian.baldeo@agiletechops.com;" +
-                                          "bill.duque@agiletechops.com", "Complete 1 card", $"Current count: {currentCount}");
+                                          "bill.duque@agiletechops.com", "Complete 1 card", $"Current count: {currentCount}");*/
         
         currentCount++;
     }

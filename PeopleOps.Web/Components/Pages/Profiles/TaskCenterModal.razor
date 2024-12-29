@@ -25,16 +25,18 @@
             <FluentGrid Spacing="2" Justify="JustifyContent.Center">
                 @foreach (var attendance in AttendanceResponses)
                 {
-                    <FluentGridItem>
+                    <FluentGridItem xs="4">
                         <FluentCard MinimalStyle="true" Style="@attendance.NotCurrentDayStyle" AreaRestricted="false">
                             <FluentLabel Typo="Typography.H6" Alignment="HorizontalAlignment.Center">
                                 @if (attendance.IsPresent)
                                 {
                                     <FluentEmoji Style="margin-right:3px;"
                                                  Value="@(new Emojis.Activities.Color.Default.ConfettiBall())"
-                                                 Slot="start" Width="18"/>
+                                                 Slot="start" Width="22"/>
                                 }
-                                @attendance.DisplayDate
+                                <FluentLabel>
+                                    @attendance.DisplayDate
+                                </FluentLabel>
                             </FluentLabel>
                             <FluentDivider Role="DividerRole.Presentation"></FluentDivider>
                             @if (attendance.IsMissedThisDay)
@@ -138,7 +140,7 @@
         <Header>
             <FluentEmoji Value="@(new Emojis.PeopleBody.Flat.Default.Technologist())" Width="18"/>
             <span style="color:chocolate;">
-                Daily Tasks
+                Daily
             </span>
         </Header>
         <Content>
@@ -149,7 +151,7 @@
         <Header>
             <FluentEmoji Value="@(new Emojis.Objects.Flat.Default.Calendar())" Width="18"/>
             <span style="color:chocolate;">
-                Weekly Tasks
+                Weekly
             </span>
         </Header>
         <Content>
@@ -160,7 +162,7 @@
         <Header>
             <FluentEmoji Value="@(new Emojis.Objects.Flat.Default.Calendar())" Width="18"/>
             <span style="color:chocolate;">
-                Monthly Tasks
+                Monthly
             </span>
         </Header>
         <Content>

@@ -51,7 +51,7 @@
                     <FluentCounterBadge Count="10" BackgroundColor="@Color.Error" Color="Color.Fill">
                         <ChildContent>
                             <FluentButton @onclick="@OpenDialogAsync" Style="font-weight:500; font-size:small;">
-                               Task Center
+                               Quest Center
                             </FluentButton>
                         </ChildContent>
                         <BadgeTemplate>New📃!</BadgeTemplate>
@@ -200,7 +200,6 @@
             Alignment = HorizontalAlignment.Center,
             PrimaryAction = "",
             SecondaryAction = "Close",
-            Width = "500px",
         };
 
         IDialogReference dialog = await DialogService.ShowDialogAsync<TaskCenterModal>(simplePerson, parameters);

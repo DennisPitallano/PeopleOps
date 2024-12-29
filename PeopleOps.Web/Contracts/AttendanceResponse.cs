@@ -14,7 +14,7 @@ public class AttendanceResponse
     
     public DateTime ActivityDate { get; set; }
 
-    public string DisplayDate => ActivityDate.ToString("MMMM dd");
+    public string DisplayDate => ActivityDate.ToString("MMM dd");
     
     public string DisplayTimeIn => TimeIn?.ToString("hh:mm tt") ?? "N/A";
     
