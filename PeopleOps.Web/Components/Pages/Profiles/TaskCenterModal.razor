@@ -1,10 +1,13 @@
 ﻿@using MediatR
 @using PeopleOps.Web.Contracts
 @using PeopleOps.Web.Features.Attendance
+@using Client = Supabase.Client
+@using Supabase.Gotrue
 @implements IDialogContentComponent<PeopleOps.Web.Contracts.ProfileResponse>
 @inject ISender Sender
 @inject IDialogService DialogService
 @rendermode InteractiveServer
+@inject Client supabase
 @*<FluentMessageBarProvider Section="@App.MESSAGES_DIALOG" MaxMessageCount="1" />
 
 <p>Your lastname is @Content.Lastname and you are @Content.Age years young </p>*@
@@ -198,6 +201,7 @@
 
     protected override async Task<Task> OnInitializedAsync()
     {
+        User? user = supabase.Auth.CurrentUser;
         //get the attendance of the user
         AttendanceResponses = await Sender.Send(new GetAttendanceByProfile.Query { ProfileId = 1 });
 

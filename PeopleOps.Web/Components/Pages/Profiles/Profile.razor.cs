@@ -1,6 +1,5 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Components;
-using Microsoft.FluentUI.AspNetCore.Components;
 using PeopleOps.Web.Contracts;
 
 namespace PeopleOps.Web.Components.Pages.Profiles;

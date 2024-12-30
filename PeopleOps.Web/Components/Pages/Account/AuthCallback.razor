@@ -1,0 +1,14 @@
+﻿@page "/auth/callback"
+<h3>AuthCallback</h3>
+@inject NavigationManager NavigationManager
+@code {
+    
+    protected override  Task OnInitializedAsync()
+    {
+       // get query params
+       
+         var query = NavigationManager.ToAbsoluteUri(NavigationManager.Uri).Query;
+        return base.OnInitializedAsync();
+    }
+    
+}

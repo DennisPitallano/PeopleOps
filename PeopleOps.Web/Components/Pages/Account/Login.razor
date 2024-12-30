@@ -1,0 +1,37 @@
+﻿@page "/Login"
+@using Supabase.Gotrue
+@using Client = Supabase.Client
+@inject Client supabase
+@code {
+
+    protected override async Task<Task> OnAfterRenderAsync(bool firstRender)
+    {
+       // var signInUrl = supabase.Auth.SignIn(Constants.Provider.Google);
+        
+        return  base.OnAfterRenderAsync(firstRender);
+    }
+
+    protected override Task OnInitializedAsync()
+    {
+        supabase.Auth.AddStateChangedListener((sender, changed) =>
+        {
+            switch (changed)
+            {
+                case Constants.AuthState.SignedIn:
+                    Console.WriteLine("Signed in - " + supabase.Auth.CurrentUser.Email);
+                    break;
+                case Constants.AuthState.SignedOut:
+                    break;
+                case Constants.AuthState.UserUpdated:
+                    break;
+                case Constants.AuthState.PasswordRecovery:
+                    break;
+                case Constants.AuthState.TokenRefreshed:
+                    break;
+            }
+        });
+
+        return base.OnInitializedAsync();
+    }
+
+}

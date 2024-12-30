@@ -1,9 +1,10 @@
 using Hangfire;
 using Hangfire.MemoryStorage;
-using PeopleOps.Web;
-using PeopleOps.Web.Components;
-using Microsoft.FluentUI.AspNetCore.Components;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Components.Authorization;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.FluentUI.AspNetCore.Components.Components.Tooltip;
+using PeopleOps.Web.Providers;
 using PeopleOps.Web.Services;
 using Supabase;
 
@@ -16,12 +17,34 @@ builder.AddServiceDefaults();
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
-builder.Services.AddFluentUIComponents();
 
+// Authenticated services
+builder.Services.AddScoped<AuthService>();
+builder.Services.AddScoped<UserService>();
+builder.Services.AddScoped<AuthenticationStateProvider, SupabaseAuthenticationStateProvider>();
+builder.Services.AddSingleton<IAuthorizationMiddlewareResultHandler, BlazorAuthorizationMiddlewareResultHandler>();
+builder.Services.TryAddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+
+builder.Services.AddAuthentication(o =>
+{
+    o.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+}).AddCookie(options =>
+{
+    options.Cookie.Name = "PeopleOps";
+    options.Events.OnRedirectToLogin = context =>
+    {
+        context.Response.StatusCode = 401;
+        return Task.CompletedTask;
+    };
+});
+
+builder.Services.AddFluentUIComponents();
 builder.Services.AddOutputCache();
+builder.Services.AddHttpContextAccessor();
 
 // register mediatr
 builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssemblyContaining<Program>());
+
 // register supabase client
 var url = builder.Configuration["SUPABASE_URL"];
 var key = builder.Configuration["SUPABASE_KEY"];
@@ -29,7 +52,7 @@ var options = new SupabaseOptions
 {
     AutoRefreshToken = true,
     AutoConnectRealtime = true,
-    // SessionHandler = new SupabaseSessionHandler() <-- This must be implemented by the developer
+    SessionHandler = new SupabaseSessionHandler(new HttpContextAccessor())
 };
 
 // Note the creation as a singleton.
@@ -76,6 +99,9 @@ app.UseAntiforgery();
 app.UseOutputCache();
 
 app.MapStaticAssets();
+
+app.UseAuthentication();
+app.UseAuthorization();
 
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();

@@ -1,10 +1,17 @@
 ﻿@page "/counter"
+@using System.Security.Claims
+@using Microsoft.AspNetCore.Authentication
+@using Microsoft.AspNetCore.Authentication.Cookies
+@using Microsoft.AspNetCore.Components.Authorization
+@using Microsoft.AspNetCore.Identity
 @using PeopleOps.Web.Services
 @using Supabase.Gotrue
 @using Client = Supabase.Client
 @rendermode InteractiveServer
 @inject Client supabase
 @inject IEmailService EmailService
+@inject NavigationManager NavigationManager
+@inject AuthenticationStateProvider AuthenticationStateProvider
 <PageTitle>Counter</PageTitle>
 
 <h1>Counter</h1>
@@ -16,11 +23,50 @@
 <FluentButton Appearance="Appearance.Accent" @onclick="IncrementCount">Click me</FluentButton>
 
 @code {
+    [CascadingParameter]
+    public HttpContext? HttpContext { get; set; }
     private int currentCount = 0;
+
+    protected override async Task<Task> OnInitializedAsync()
+    {
+        var user = supabase.Auth.CurrentUser;
+        var state = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        return base.OnInitializedAsync();
+    }
 
     private async Task IncrementCount()
     {
-        var signInUrl = supabase.Auth.SignIn(Constants.Provider.Google);
+        
+        var session = await supabase.Auth.SignInWithPassword("dennis.pitallano@agiletectops.com", "!Q2w3e4r5t");
+        /*var userIdentity = new ClaimsIdentity(CookieAuthenticationDefaults.AuthenticationScheme);
+        userIdentity.AddClaims([
+            new Claim(ClaimTypes.Name,session.User.Email),
+            new Claim(ClaimTypes.Expiration, session.ExpiresIn.ToString()),
+            new Claim("JwtToken", session.TokenType + " " + session.AccessToken),
+            new Claim("RefreshToken", session.RefreshToken),
+            new Claim("Id", session.User.Id),
+        ]);
+         await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme,
+            new ClaimsPrincipal(userIdentity)).ConfigureAwait(false);*/
+
+        
+       // var user = supabase.Auth.CurrentUser;
+       
+     //  var state = await supabase.Auth.SignInWithIdToken(Constants.Provider.Google,"684252835022-kifkhke7prtpk8714gjst6kdbdj6k333.apps.googleusercontent.com");
+       
+       
+        /*var state = await supabase.Auth.SignIn(Constants.Provider.Google, new SignInOptions
+        {
+            FlowType = Constants.OAuthFlowType.PKCE,
+            RedirectTo = "/oauth/callback"
+        });*/
+
+      //  var code_challenge = state.Uri.Query.Split("&").FirstOrDefault(x => x.Contains("code_challenge"))?.Split("=")[1];
+     //   var session = await supabase.Auth.ExchangeCodeForSession(state.PKCEVerifier,code_challenge);
+     //?flow_type=pkce&code_challenge=uU1fEz2NeY7njthovZ_kW-h2KCFe68SnpPPRab66-3U&code_challenge_method=s256&provider=google&redirect_to=/counter
+        // redirect to google sign in
+      //  NavigationManager.NavigateTo(signInUrl.Uri.ToString());
+        
 
         /*await EmailService.SendEmailAsync("dpitallano@gmail.com;" +
                                           "jefferson.delacruz@agiletechops.com;" +
