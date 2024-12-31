@@ -1,33 +1,32 @@
 ﻿@page "/"
+@using System.Security.Claims
 @using Microsoft.AspNetCore.Authorization
-@using Client = Supabase.Client
 @using Microsoft.AspNetCore.Components.Authorization
+@using Client = Supabase.Client
 @inject Client Supabase
 @attribute [Authorize]
 @inject IJSRuntime JsRuntime
-
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@rendermode InteractiveServer
 <PageTitle>Home</PageTitle>
 <CascadingAuthenticationState>
-<AuthorizedView>
-    <NotAuthorized>
-        <p>You are not authorized to view this page.</p>
-    </NotAuthorized>
-    <Authorized>
-        <p>Welcome, @Supabase.Auth.CurrentUser?.Email</p>
-    </Authorized>
-</AuthorizedView>
+    <AuthorizeView>
+        <Authorized>
+            <p>Welcome, @pr.User.Claims.First(c=>c.Type == "email").Value</p>
+        </Authorized>
+        <NotAuthorized>
+            <p>You are not authorized to view this page.</p>
+        </NotAuthorized>
+    </AuthorizeView>
 </CascadingAuthenticationState>
-
-<h1>Hello, world!</h1>
-
-Welcome to your new Fluent app.
 
 @code
 {
-    protected override Task OnInitializedAsync()
+    AuthenticationState pr;
+    protected override async Task OnInitializedAsync()
     {
         var user = Supabase.Auth.CurrentUser;
-        
-        return base.OnInitializedAsync();
+        pr = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        await base.OnInitializedAsync(); 
     }
 }

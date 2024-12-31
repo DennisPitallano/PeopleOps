@@ -15,7 +15,8 @@ public class RedisSessionHandler : Supabase.Gotrue.Interfaces.IGotrueSessionPers
             new ConfigurationOptions{
                 EndPoints= { {"redis-12551.c266.us-east-1-3.ec2.redns.redis-cloud.com", 12551} },
                 User="default",
-                Password="yVYIHSC8phROQ8nyBXMcKum1F23r1ioB"
+                Password="yVYIHSC8phROQ8nyBXMcKum1F23r1ioB",
+                AbortOnConnectFail = false
             }
         );
         _database = muxer.GetDatabase();
