@@ -1,9 +1,71 @@
-﻿@page "/Login"
+﻿@page "/account/Login"
+@using System.Security.Claims
+@using Microsoft.AspNetCore.Components.Authorization
+@using PeopleOps.Web.Extensions
+@using PeopleOps.Web.Services
 @using Supabase.Gotrue
 @using Client = Supabase.Client
 @inject Client supabase
-@code {
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject IJSRuntime JsRuntime
+@rendermode InteractiveServer
 
+<div style="" >
+    <FluentGrid Justify="JustifyContent.Center" AdaptiveRendering="true">
+        <FluentGridItem xs="4">
+            <FluentGridItem xs="12" sm="6" md="4">
+                <h2>Login</h2>
+                <EditForm Model="@_loginModel" OnValidSubmit="@HandleValidSubmit">
+                    <DataAnnotationsValidator />
+                    <ValidationSummary />
+
+                    <FluentTextField Label="Email" @bind-Value="_loginModel.Email" Required="true" />
+                    <FluentTextField Label="Password" @bind-Value="_loginModel.Password" Type="password" Required="true" />
+
+                    <FluentButton Type="ButtonType.Submit" Appearance="Appearance.Accent">Login</FluentButton>
+                </EditForm>
+            </FluentGridItem>
+        </FluentGridItem>
+    </FluentGrid>
+</div>
+
+
+@code {
+    private readonly LoginModel _loginModel = new();
+    string? ReturnUrl { get; set; }
+    [Inject]
+    AuthService AuthService { get; set; } = default!;
+    [Inject]
+    NavigationManager NavigationManager { get; set; } = default!;
+    string userName = "";
+    string password = "";
+
+    string error;
+    private async Task HandleValidSubmit()
+    {
+        var result = await AuthService.LoginAsync(_loginModel.Email, _loginModel.Password);
+        
+        if (result.IsSuccess)
+        {
+            var userIdentity = new ClaimsIdentity(CookieAuthenticationDefaults.AuthenticationScheme);
+            
+            var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+            var user = authState.User;
+            NavigationManager.NavigateTo(string.IsNullOrEmpty(ReturnUrl) ? "/" : ReturnUrl, true);
+        }
+        else
+        {
+            error = result.Errors.ToStringError();
+           // _notificationService.Notify(NotificationSeverity.Error, "Error connecting", result.Errors.ToStringError());
+        }
+    }
+
+    public class LoginModel
+    {
+        public string Email { get; set; }
+        public string Password { get; set; }
+    }
+    
     protected override async Task<Task> OnAfterRenderAsync(bool firstRender)
     {
        // var signInUrl = supabase.Auth.SignIn(Constants.Provider.Google);

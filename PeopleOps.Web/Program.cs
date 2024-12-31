@@ -1,3 +1,4 @@
+using Blazored.LocalStorage;
 using Hangfire;
 using Hangfire.MemoryStorage;
 using Microsoft.AspNetCore.Authorization;
@@ -17,13 +18,20 @@ builder.AddServiceDefaults();
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
-
+builder.Services.AddBlazoredLocalStorage();
 // Authenticated services
+builder.Services.AddScoped<ILocalStorageServices, LocalStorageService>();
+builder.Services.AddScoped<SupabaseSessionHandler>();
+builder.Services.AddScoped<InMemorySessionHandler>();
+builder.Services.AddScoped<BrowserSessionHandler>();
+builder.Services.AddScoped<RedisSessionHandler>();
 builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<UserService>();
 builder.Services.AddScoped<AuthenticationStateProvider, SupabaseAuthenticationStateProvider>();
 builder.Services.AddSingleton<IAuthorizationMiddlewareResultHandler, BlazorAuthorizationMiddlewareResultHandler>();
 builder.Services.TryAddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+
+builder.Services.AddAuthorizationCore();
 
 builder.Services.AddAuthentication(o =>
 {
@@ -52,9 +60,9 @@ var options = new SupabaseOptions
 {
     AutoRefreshToken = true,
     AutoConnectRealtime = true,
-    SessionHandler = new SupabaseSessionHandler(new HttpContextAccessor())
+    SessionHandler = new RedisSessionHandler()
+   // SessionHandler = builder.Services.BuildServiceProvider().GetRequiredService<RedisSessionHandler>()
 };
-
 // Note the creation as a singleton.
 builder.Services.AddSingleton(_ => new Client(url, key, options));
 
@@ -80,7 +88,6 @@ builder.Services.AddHangfireServer();
 
 builder.Services.Configure<EmailSetting>(builder.Configuration.GetSection("FluentMail"));
 builder.Services.AddScoped<IEmailService, EmailService>();
-
 var app = builder.Build();
 
 app.UseHangfireDashboard("/hangfire");

@@ -1,9 +1,22 @@
 ﻿@page "/"
-@@using Supabase.Gotrue
+@using Microsoft.AspNetCore.Authorization
 @using Client = Supabase.Client
-using Supabase
+@using Microsoft.AspNetCore.Components.Authorization
 @inject Client Supabase
+@attribute [Authorize]
+@inject IJSRuntime JsRuntime
+
 <PageTitle>Home</PageTitle>
+<CascadingAuthenticationState>
+<AuthorizedView>
+    <NotAuthorized>
+        <p>You are not authorized to view this page.</p>
+    </NotAuthorized>
+    <Authorized>
+        <p>Welcome, @Supabase.Auth.CurrentUser?.Email</p>
+    </Authorized>
+</AuthorizedView>
+</CascadingAuthenticationState>
 
 <h1>Hello, world!</h1>
 
