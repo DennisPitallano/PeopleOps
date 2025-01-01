@@ -1,6 +1,7 @@
-﻿@page "/account/Login"
+﻿@page "/Login"
+@using System.ComponentModel.DataAnnotations
 @using System.Security.Claims
-@using Microsoft.AspNetCore.Components.Authorization
+@using PeopleOps.Web.Components.Layout
 @using PeopleOps.Web.Extensions
 @using PeopleOps.Web.Services
 @using Supabase.Gotrue
@@ -8,23 +9,28 @@
 @inject Client supabase
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject IJSRuntime JsRuntime
+@layout LogInLayout
 @rendermode InteractiveServer
 
 <div style="" >
     <FluentGrid Justify="JustifyContent.Center" AdaptiveRendering="true">
-        <FluentGridItem xs="4">
-            <FluentGridItem xs="12" sm="6" md="4">
+        <FluentGridItem xs="12" sm="4" lg="3" md="3">
+            <FluentCard Style="padding-left: 1.5rem; padding-right: 1.5rem;">
                 <h2>Login</h2>
                 <EditForm Model="@_loginModel" OnValidSubmit="@HandleValidSubmit">
-                    <DataAnnotationsValidator />
-                    <ValidationSummary />
-
-                    <FluentTextField Label="Email" @bind-Value="_loginModel.Email" Required="true" />
-                    <FluentTextField Label="Password" @bind-Value="_loginModel.Password" Type="password" Required="true" />
-
-                    <FluentButton Type="ButtonType.Submit" Appearance="Appearance.Accent">Login</FluentButton>
+                    <DataAnnotationsValidator/>
+                    <ValidationSummary/>
+                    <FluentTextField Label="Email" Style="width:100%;" @bind-Value="_loginModel.Email" Required="true">
+                        <FluentIcon Value="@(new Icons.Regular.Size16.Person())" Slot="start" Color="Color.Neutral" />
+                    </FluentTextField>
+                    <FluentTextField Label="Password" Style="width:100%;" Type="password" Required="true" @bind-Value="_loginModel.Password">
+                        <FluentIcon Value="@(new Icons.Regular.Size16.Key())" Slot="start" Color="Color.Neutral" />
+                    </FluentTextField>
+                    <div style="text-align: center; padding:10px;">
+                        <FluentButton Type="ButtonType.Submit" Appearance="Appearance.Accent">Login</FluentButton>
+                    </div>
                 </EditForm>
-            </FluentGridItem>
+            </FluentCard>
         </FluentGridItem>
     </FluentGrid>
 </div>
@@ -32,7 +38,10 @@
 
 @code {
     private readonly LoginModel _loginModel = new();
-    string? ReturnUrl { get; set; }
+
+    [SupplyParameterFromQuery]
+    private string? ReturnUrl { get; set; }
+
     [Inject]
     AuthService AuthService { get; set; } = default!;
     [Inject]
@@ -62,7 +71,9 @@
 
     public class LoginModel
     {
+        [Required]
         public string Email { get; set; }
+        [Required]
         public string Password { get; set; }
     }
     
@@ -72,28 +83,4 @@
         
         return  base.OnAfterRenderAsync(firstRender);
     }
-
-    protected override Task OnInitializedAsync()
-    {
-        supabase.Auth.AddStateChangedListener((sender, changed) =>
-        {
-            switch (changed)
-            {
-                case Constants.AuthState.SignedIn:
-                    Console.WriteLine("Signed in - " + supabase.Auth.CurrentUser.Email);
-                    break;
-                case Constants.AuthState.SignedOut:
-                    break;
-                case Constants.AuthState.UserUpdated:
-                    break;
-                case Constants.AuthState.PasswordRecovery:
-                    break;
-                case Constants.AuthState.TokenRefreshed:
-                    break;
-            }
-        });
-
-        return base.OnInitializedAsync();
-    }
-
 }

@@ -1,5 +1,7 @@
 ﻿@page "/profile"
+@using Microsoft.AspNetCore.Authorization
 @using PeopleOps.Web.Contracts
+@attribute [Authorize]
 @rendermode InteractiveServer
 <PageTitle>Profile</PageTitle>
 

@@ -1,6 +1,7 @@
 ﻿using System.Text.Json;
 using Supabase.Gotrue;
 using Blazored.LocalStorage;
+using Microsoft.Extensions.Caching.Memory;
 using StackExchange.Redis;
 namespace PeopleOps.Web.Services;
 
@@ -98,25 +99,43 @@ public class BrowserSessionHandler : Supabase.Gotrue.Interfaces.IGotrueSessionPe
 public class InMemorySessionHandler : Supabase.Gotrue.Interfaces.IGotrueSessionPersistence<Session>
 {
     private Session? _session;
+    private readonly IMemoryCache _memoryCache;
+
+    public InMemorySessionHandler(IMemoryCache memoryCache)
+    {
+        _memoryCache = memoryCache;
+    }
 
     public void SaveSession(Session session)
     {
-        _session = session;
+        _memoryCache.GetOrCreate("session", entry =>
+        {
+            entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(30);
+            return session;
+        });
         Console.WriteLine("Session Saved in Memory");
     }
 
     public void DestroySession()
     {
         _session = new Session();
+        _memoryCache.Remove("session");
         Console.WriteLine("Session Destroyed from Memory");
     }
 
     public Session? LoadSession()
     {
-        return _session ?? new Session();
+       var result =   _memoryCache.TryGetValue("session", out _session);
+        return result ? _session : null;
     }
-}
+    
+    public Task<Session?> LoadSessionAsync()
+    {
+        _memoryCache.TryGetValue("session", out _session);
+        return Task.FromResult(_session);
+    }
 
+}
 
 public class SupabaseSessionHandler : Supabase.Gotrue.Interfaces.IGotrueSessionPersistence<Session>
 {

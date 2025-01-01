@@ -1,0 +1,20 @@
+﻿@using PeopleOps.Web.Components.Pages.Account
+@using PeopleOps.Web.Extensions
+@inject NavigationManager NavigationManager
+@inject IdentityRedirectManager IdentityRedirectManager
+@code {
+    [CascadingParameter]
+    HttpContext HttpContext { get; set; }
+    protected override void OnInitialized()
+    {
+        var uri = NavigationManager.Uri;
+        if (!Uri.IsWellFormedUriString(uri, UriKind.Relative))
+        {
+            uri = NavigationManager.ToBaseRelativePath(uri);
+        }
+        var redirectUrl = $"Login?returnUrl={uri}";
+        NavigationManager.NavigateToIgnoreException(redirectUrl);
+        //HttpContext.HttpRedirectTo(redirectUrl);
+        //IdentityRedirectManager.RedirectTo(redirectUrl);
+    }
+}

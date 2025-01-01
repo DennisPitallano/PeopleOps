@@ -4,6 +4,7 @@ using System.Text.Json;
 using FluentResults;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
+using Microsoft.Extensions.Caching.Memory;
 using PeopleOps.Web.Helpers;
 using PeopleOps.Web.Models;
 using Supabase.Gotrue;
@@ -19,15 +20,17 @@ public class AuthService
     private readonly IConfiguration _configuration;
     private readonly Supabase.Client _supabase;
     private readonly ProtectedLocalStorage _localStorage;
-    private readonly RedisSessionHandler _sessionHandler ;
+    private readonly RedisSessionHandler _sessionHandler;
+    private readonly IMemoryCache _memoryCache;
     public AuthService(NavigationManager navigation, IConfiguration configuration, Supabase.Client supabase,
-        ProtectedLocalStorage localStorage, RedisSessionHandler sessionHandler)
+        ProtectedLocalStorage localStorage, RedisSessionHandler sessionHandler, IMemoryCache memoryCache)
     {
         _navigation = navigation;
         _configuration = configuration;
         _supabase = supabase;
         _localStorage = localStorage;
         _sessionHandler = sessionHandler;
+        _memoryCache = memoryCache;
     }
 
     public async Task<Result> LoginAsync(string email, string password)
@@ -39,7 +42,13 @@ public class AuthService
             {
                 return Result.Fail("An error occured");
             }
-
+            // Save session to memory cache
+            await  _memoryCache.GetOrCreateAsync($"authSession-{response.User?.Aud}", entry =>
+            {
+                entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(30);
+                return Task.FromResult(response);
+            });
+            
             return Result.Ok();
         }
         catch (Exception ex)
@@ -125,7 +134,7 @@ public class AuthService
         
         try
         {
-            var session = await _sessionHandler.LoadSessionAsync();
+            var session = await  _sessionHandler.LoadSessionAsync();
             accessToken = session?.AccessToken;
             refreshToken = session?.RefreshToken;
         }

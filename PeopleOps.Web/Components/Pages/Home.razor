@@ -2,14 +2,16 @@
 @using System.Security.Claims
 @using Microsoft.AspNetCore.Authorization
 @using Microsoft.AspNetCore.Components.Authorization
+@using Microsoft.Extensions.Caching.Hybrid
 @using Client = Supabase.Client
 @inject Client Supabase
-@attribute [Authorize]
 @inject IJSRuntime JsRuntime
 @inject AuthenticationStateProvider AuthenticationStateProvider
+@inject HybridCache Cache
 @rendermode InteractiveServer
+
 <PageTitle>Home</PageTitle>
-<CascadingAuthenticationState>
+@*<CascadingAuthenticationState>
     <AuthorizeView>
         <Authorized>
             <p>Welcome, @pr.User.Claims.First(c=>c.Type == "email").Value</p>
@@ -18,7 +20,7 @@
             <p>You are not authorized to view this page.</p>
         </NotAuthorized>
     </AuthorizeView>
-</CascadingAuthenticationState>
+</CascadingAuthenticationState>*@
 
 @code
 {
@@ -26,7 +28,12 @@
     protected override async Task OnInitializedAsync()
     {
         var user = Supabase.Auth.CurrentUser;
-        pr = await AuthenticationStateProvider.GetAuthenticationStateAsync();
-        await base.OnInitializedAsync(); 
+       var result =   await Cache.GetOrCreateAsync("user", entry =>
+        {
+            var name = "Dennis Pitallano";
+            return ValueTask.FromResult(name); 
+        });
+      //  pr = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        //await base.OnInitializedAsync(); 
     }
 }
