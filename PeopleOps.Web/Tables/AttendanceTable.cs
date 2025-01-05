@@ -7,7 +7,7 @@ namespace PeopleOps.Web.Tables;
 public class AttendanceTable : BaseModel
 {
     [PrimaryKey("id")]
-    public long Id { get; set; }
+    public int Id { get; set; }
     
     [Column("created_at")]
     public DateTime CreatedAt { get; set; }

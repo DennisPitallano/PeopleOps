@@ -181,18 +181,13 @@
     private bool _trapFocus = true;
     private bool _modal = true;
 
-    ProfileResponse simplePerson = new()
-    {
-        FirstName = "Dan",
-        LastName = "Sanderson",
-    };
 
     private async Task OpenDialogAsync()
     {
 
         DialogParameters parameters = new()
         {
-            Title = $"Hello {simplePerson.FirstName}",
+            Title = $"Hello {ProfileResponse.FirstName}",
             TrapFocus = false,
             Modal = _modal,
             PreventScroll = true,
@@ -204,16 +199,8 @@
             SecondaryAction = "Close",
         };
 
-        IDialogReference dialog = await DialogService.ShowDialogAsync<TaskCenterModal>(simplePerson, parameters);
+        IDialogReference dialog = await DialogService.ShowDialogAsync<TaskCenterModal>(ProfileResponse, parameters);
         DialogResult? result = await dialog.Result;
         
-        
-        if (result.Data is not null)
-        {
-            ProfileResponse? simplePerson = result.Data as ProfileResponse;
-        }
-        else
-        {
-        }
     }
 }

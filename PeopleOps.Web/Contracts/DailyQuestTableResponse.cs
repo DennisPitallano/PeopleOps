@@ -2,7 +2,7 @@
 
 namespace PeopleOps.Web.Contracts;
 
-public abstract class DailyQuestTableResponse
+public class DailyQuestTableResponse
 {
     [JsonPropertyName("id")]
     public long Id { get; set; }
@@ -23,5 +23,20 @@ public abstract class DailyQuestTableResponse
     public bool CompletionStatus { get; set; }
     
     [JsonPropertyName("completion_date")]
-    public DateTime CompletionDate { get; set; }
+    public DateTime? CompletionDate { get; set; }
+    
+    [JsonPropertyName("quest_group")]
+    public string QuestGroup { get; set; }
+    
+    [JsonPropertyName("quest_name")]
+    public string QuestName { get; set; }
+    
+    [JsonPropertyName("quest_description")]
+    public string QuestDescription { get; set; }
+    
+    [JsonPropertyName("points")]
+    public int QuestPoints { get; set; }
+    
+    [JsonPropertyName("quest_type")]
+    public bool IsMainQuest { get; set; }
 }

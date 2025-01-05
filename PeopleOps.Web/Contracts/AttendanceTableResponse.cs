@@ -5,7 +5,7 @@ namespace PeopleOps.Web.Contracts;
 public class AttendanceTableResponse 
 {
     [JsonPropertyName("id")]
-    public long Id { get; set; }
+    public int Id { get; set; }
     
     [JsonPropertyName("created_at")]
     public DateTime CreatedAt { get; set; }

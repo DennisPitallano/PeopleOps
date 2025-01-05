@@ -4,7 +4,7 @@ using MediatR;
 using PeopleOps.Web.Contracts;
 using Supabase;
 
-namespace PeopleOps.Web.Features.Profile;
+namespace PeopleOps.Web.Features.Quest;
 
 public static class GetDailyQuestsByUser
 {

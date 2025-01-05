@@ -2,6 +2,7 @@
 @using PeopleOps.Web.Contracts
 @using PeopleOps.Web.Features.Attendance
 @using PeopleOps.Web.Features.Profile
+@using PeopleOps.Web.Features.Quest
 @using Client = Supabase.Client
 @using Supabase.Gotrue
 @implements IDialogContentComponent<PeopleOps.Web.Contracts.ProfileResponse>
@@ -17,8 +18,8 @@
 <FluentTextField @bind-Value="@Content.Lastname">Your lastname:</FluentTextField>
 <FluentNumberField @bind-Value="@Content.Age">Your age:</FluentNumberField>*@
 <FluentDialogHeader Visible="false"/>
-<FluentTabs ActiveTabId="tab-1" Size="TabSize.Large" Style="text-align:center">
-    <FluentTab Id="tab-1" Style="padding-top:1rem;">
+<FluentTabs ActiveTabId="@_activeTabId" Size="TabSize.Large" Style="text-align:center">
+    <FluentTab Id="tab-attendance" Style="padding-top:1rem;">
         <Header>
             <FluentEmoji Value="@(new Emojis.TravelPlaces.Flat.Default.ThreeOClock())" Width="18"/>
             <span style="color:darkgreen;">
@@ -78,13 +79,16 @@
                                                     @attendance.DisplayTimeIn
                                                 </FluentBadge>
                                             </FluentButton>
-                                            <FluentTooltip Anchor="@attendance.DisplayTimeInId" HideTooltipOnCursorLeave="true" Position=TooltipPosition.Top Delay=200>Time In</FluentTooltip>
+                                            <FluentTooltip Anchor="@attendance.DisplayTimeInId"
+                                                           HideTooltipOnCursorLeave="true" Position=TooltipPosition.Top
+                                                           Delay=200>Time In
+                                            </FluentTooltip>
                                         </div>
                                     }
                                     else
                                     {
                                         <div>
-                                            <FluentButton OnClick="SigninAsync" Disabled="@(!attendance.IsCurrentDay)"
+                                            <FluentButton OnClick="() => SigninAsync(attendance.Id)" Disabled="@(!attendance.IsCurrentDay)"
                                                           IconEnd="@(new Icons.Regular.Size16.ClockAlarm())"
                                                           Appearance="Appearance.Accent">
                                                 Sign in
@@ -95,8 +99,9 @@
                                     @if (attendance is { TimeIn: not null, TimeOut: null })
                                     {
                                         <div>
-                                            <FluentButton OnClick="SignOutAsync" IconEnd="@(new Icons.Regular.Size16.ClockAlarm())"
-                                                          Appearance="Appearance.Outline" Color="darkred" >
+                                            <FluentButton OnClick="() => SignOutAsync(attendance.Id)"
+                                                          IconEnd="@(new Icons.Regular.Size16.ClockAlarm())"
+                                                          Appearance="Appearance.Outline" Color="darkred">
                                                 Sign out
                                             </FluentButton>
                                         </div>
@@ -104,14 +109,18 @@
                                     @if (attendance.TimeOut != null)
                                     {
                                         <div>
-                                            <FluentButton Id="@attendance.DisplayTimeOutId" Color="green"  Style="font-weight:bold;"
+                                            <FluentButton Id="@attendance.DisplayTimeOutId" Color="green"
+                                                          Style="font-weight:bold;"
                                                           IconEnd="@(new Icons.Regular.Size16.CalendarCheckmark())"
                                                           Appearance="Appearance.Stealth">
                                                 <FluentBadge Appearance="Appearance.Accent">
                                                     @attendance.DisplayTimeOut
                                                 </FluentBadge>
                                             </FluentButton>
-                                            <FluentTooltip Anchor="@attendance.DisplayTimeOutId" HideTooltipOnCursorLeave="true" Position=TooltipPosition.Top Delay=200>Time Out</FluentTooltip>
+                                            <FluentTooltip Anchor="@attendance.DisplayTimeOutId"
+                                                           HideTooltipOnCursorLeave="true" Position=TooltipPosition.Top
+                                                           Delay=200>Time Out
+                                            </FluentTooltip>
                                         </div>
                                     }
                                     @*<div>
@@ -140,7 +149,7 @@
             </FluentGrid>
         </Content>
     </FluentTab>
-    <FluentTab Id="tab-2">
+    <FluentTab Id="tab-daily">
         <Header>
             <FluentEmoji Value="@(new Emojis.PeopleBody.Flat.Default.Technologist())" Width="18"/>
             <span style="color:chocolate;">
@@ -148,10 +157,107 @@
             </span>
         </Header>
         <Content>
-            Content 1
+            <FluentGrid Spacing="2" Justify="JustifyContent.SpaceAround">
+                @if (DailyQuestResponses.Count == 0)
+                {
+                    <FluentStack Orientation="Orientation.Vertical"
+                                 VerticalAlignment="VerticalAlignment.Center"
+                                 VerticalGap="2" Style="padding:1rem;"
+                                 HorizontalAlignment="HorizontalAlignment.Center">
+                        <FluentLabel Typo="Typography.H6" Alignment="HorizontalAlignment.Center"
+                                     Style="margin-bottom:15px;">
+                            Are you ready to take on the day?
+                        </FluentLabel>
+                        <FluentButton OnClick="InitializeDailyQuests"
+                                      IconEnd="@(new Icons.Regular.Size16.CalendarCheckmark())"
+                                      Appearance="Appearance.Accent">
+                            I'm ready!
+                        </FluentButton>
+                    </FluentStack>
+                }
+                else
+                {
+                    <FluentStack HorizontalAlignment="HorizontalAlignment.Center"
+                                 Orientation="Orientation.Horizontal"
+                                 Style="margin-top:1rem;" HorizontalGap="3">
+                        <FluentLabel Typo="Typography.H6" Alignment="HorizontalAlignment.Center">
+                            Main Quests
+                        </FluentLabel>
+                        <FluentEmoji Value="@(new Emojis.PeopleBody.Color.Default.PersonClimbing())"
+                                     Width="18"/>
+                    </FluentStack>
+                    <FluentDivider Orientation="Orientation.Horizontal"></FluentDivider>
+
+                    <FluentAccordion ExpandMode="AccordionExpandMode.Single">
+                        @foreach (var quest in DailyMainQuests)
+                        {
+                            <FluentAccordionItem Heading="@quest.QuestName">
+                                <div slot="end">
+                                    <FluentStack HorizontalGap="3" Style="padding:3px;"
+                                                 Orientation="Orientation.Horizontal"
+                                                 VerticalAlignment="VerticalAlignment.Center">
+                                        <FluentBadge Circular=true Appearance="Appearance.Neutral">
+                                            <img alt="" width="16" class="h-10 max-w-full"
+                                                 src="/assets/media/images/gamer-coin.svg">
+                                            <FluentLabel Typo="Typography.H6" Style="color:darkgoldenrod;">
+                                                @quest.QuestPoints
+                                            </FluentLabel>
+                                        </FluentBadge>
+                                        @if(quest.CompletionStatus)
+                                        {
+                                            <FluentBadge Circular=true Appearance="Appearance.Accent">
+                                                In Progress
+                                            </FluentBadge>
+                                        }
+                                    </FluentStack>
+                                   
+                                </div>
+                                <FluentStack Orientation="Orientation.Vertical" VerticalAlignment="VerticalAlignment.Center" 
+                                             HorizontalAlignment="HorizontalAlignment.Center" VerticalGap="3">
+                                    <div>
+                                        @quest.QuestDescription
+                                    </div>
+                                    @if (!quest.CompletionStatus)
+                                    {
+                                        <FluentButton OnClick="() => SetQuestAsInProgress(quest.Id)" IconEnd="@(new Icons.Filled.Size16.ArrowCircleRight())"
+                                                      Appearance="Appearance.Accent">
+                                            Start Quest
+                                        </FluentButton>
+                                    }
+                                    @if(quest is { CompletionStatus: true, CompletionDate: null })
+                                    {
+                                        <FluentButton IconEnd="@(new Icons.Filled.Size16.CheckmarkCircle())"
+                                                      Appearance="Appearance.Accent">
+                                            Complete Quest
+                                        </FluentButton>
+                                    }
+                                </FluentStack>
+                            </FluentAccordionItem>
+                        }
+                    </FluentAccordion>
+                    <FluentStack HorizontalAlignment="HorizontalAlignment.Center"
+                                 Orientation="Orientation.Horizontal"
+                                 Style="margin-top:1rem;" HorizontalGap="3">
+                        <FluentLabel Typo="Typography.H6" Alignment="HorizontalAlignment.Center">
+                            Side Quests
+                        </FluentLabel>
+                        <FluentEmoji Value="@(new Emojis.Objects.Color.Default.GemStone())"
+                                     Width="18"/>
+                    </FluentStack>
+                    <FluentDivider Orientation="Orientation.Horizontal"></FluentDivider>
+                    <FluentAccordion ExpandMode="AccordionExpandMode.Single">
+                        @foreach (var quest in DailySideQuests)
+                        {
+                            <FluentAccordionItem Heading="@quest.QuestName">
+                                @quest.QuestDescription
+                            </FluentAccordionItem>
+                        }
+                    </FluentAccordion>
+                }
+            </FluentGrid>
         </Content>
     </FluentTab>
-    <FluentTab Id="tab-3">
+    <FluentTab Id="tab-weekly">
         <Header>
             <FluentEmoji Value="@(new Emojis.Objects.Flat.Default.Calendar())" Width="18"/>
             <span style="color:chocolate;">
@@ -162,7 +268,7 @@
             Content 2
         </Content>
     </FluentTab>
-    <FluentTab Id="tab-4">
+    <FluentTab Id="tab-monthly">
         <Header>
             <FluentEmoji Value="@(new Emojis.Objects.Flat.Default.Calendar())" Width="18"/>
             <span style="color:chocolate;">
@@ -174,16 +280,6 @@
         </Content>
     </FluentTab>
 </FluentTabs>
-@*@if (Dialog != null)
-{
-    <FluentStack Orientation="Orientation.Vertical" Style="border: 1px solid red; padding: 10px">
-        <span>This section is visible only when component is hosted inside a Dialog</span>
-        <FluentButton OnClick="@(() => ToggleDialogPrimaryActionButton(true))">Enable Dialog Primary Action
-        </FluentButton>
-        <FluentButton OnClick="@(() => ToggleDialogPrimaryActionButton(false))">Disable Dialog Primary Action
-        </FluentButton>
-    </FluentStack>
-}*@
 
 @code {
     /*[Parameter]
@@ -196,60 +292,99 @@
         Dialog!.TogglePrimaryActionButton(enable);
     }
 
-    [Parameter] public ProfileResponse Content { get; set; }
+    [Parameter] public required ProfileResponse Content { get; set; }
 
     private List<AttendanceTableResponse> AttendanceResponses { get; set; } = [];
-    
+
     private List<DailyQuestTableResponse> DailyQuestResponses { get; set; } = [];
-    
+    private List<DailyQuestTableResponse> DailyMainQuests { get; set; } = [];
+    private List<DailyQuestTableResponse> DailySideQuests { get; set; } = [];
+
     User? _user = new();
+    
+    string _activeTabId = "tab-attendance";
     
     protected override async Task<Task> OnInitializedAsync()
     {
         _user = supabase.Auth.CurrentUser;
         //get the attendance of the user
-        AttendanceResponses = await Sender.Send(new GetAttendanceByUser.Query { userid = Guid.Parse(_user?.Id) });
-        
-        //get daily quests
-        DailyQuestResponses = await Sender.Send(new GetDailyQuestsByUser.Query { userid = Guid.Parse(_user?.Id), questgroup = "daily" });
-        
+        AttendanceResponses = await Sender.Send(new GetAttendanceByUser.Query { userid = Content.Id });
+
+        await LoadDailyQuests();
 
         return base.OnInitializedAsync();
     }
-    
-    // sign out
-    private async Task SignOutAsync()
+
+    private async Task LoadDailyQuests()
     {
-        await Sender.Send(new SignOutAttendance.Command { Id = 13 });
-        
-        //refresh the attendance
-        AttendanceResponses = await Sender.Send(new GetAttendanceByUser.Query { userid = Guid.Parse(_user?.Id) });
-        
+        //get daily quests
+        DailyQuestResponses = await Sender.Send(new GetDailyQuestsByUser.Query { userid = Content.Id, questgroup = "daily" });
+
+        //main quests
+        DailyMainQuests = DailyQuestResponses.Where(x => x.IsMainQuest).ToList();
+        //side quests
+        DailySideQuests = DailyQuestResponses.Where(x => !x.IsMainQuest).ToList();
+    }
+
+    // initialize the daily quests
+    private async Task InitializeDailyQuests()
+    {
+        _activeTabId = "tab-daily";
+        //get daily quests
+        var isGenerated = await Sender.Send(new GenerateDailyQuest.Command { userid = Content.Id });
+
+        if (isGenerated)
+        {
+           await LoadDailyQuests();
+        }
         StateHasChanged();
     }
     
-    // sign in
-    private async Task SigninAsync()
+    // set quest as in progress
+    private async Task SetQuestAsInProgress(long questId)
     {
-        await Sender.Send(new SignInAttendance.Command { Id = 13 });
-        
+        _activeTabId = "tab-daily";
+        var isSuccess =  await Sender.Send(new SetQuestAsInProgress.Command { Id = questId });
+        if (isSuccess)
+        {
+            await LoadDailyQuests();
+        }
+        StateHasChanged();
+    }
+
+    // sign out
+    private async Task SignOutAsync(int attendanceId)
+    {
+        _activeTabId = "tab-attendance";
+        await Sender.Send(new SignOutAttendance.Command { Id = attendanceId });
         //refresh the attendance
-        AttendanceResponses = await Sender.Send(new GetAttendanceByUser.Query { userid =  Guid.Parse(_user?.Id) });
-        
+        AttendanceResponses = await Sender.Send(new GetAttendanceByUser.Query { userid = Content.Id });
+
+        StateHasChanged();
+    }
+
+    // sign in
+    private async Task SigninAsync(int attendanceId)
+    {
+        _activeTabId = "tab-attendance";
+        await Sender.Send(new SignInAttendance.Command { Id = attendanceId });
+        //refresh the attendance
+        AttendanceResponses = await Sender.Send(new GetAttendanceByUser.Query { userid = Content.Id });
+
         //show message box that the user has signed in successfully with conffeti emoji
         var dialog = await DialogService.ShowMessageBoxAsync(new DialogParameters<MessageBoxContent>()
         {
             Content = new MessageBoxContent
             {
                 MarkupMessage = new MarkupString("<span style='font-size:7rem;'>\ud83c\udf89</span>"),
-               // MarkupMessage = new MarkupString("<img src='assets/media/images/congratulations.gif' style='font-size:10rem; width:150px; height:50;' />"),
+                // MarkupMessage = new MarkupString("<img src='assets/media/images/congratulations.gif' style='font-size:10rem; width:150px; height:50;' />"),
                 IconColor = Color.Success,
             },
             PrimaryAction = "",
-            SecondaryAction ="Hooray!🥳",
+            SecondaryAction = "Hooray!🥳",
             Width = "170px",
             Height = "170px",
-            TrapFocus =false,
+            TrapFocus = false,
             PreventDismissOnOverlayClick = false,
             Alignment = HorizontalAlignment.Start,
         });

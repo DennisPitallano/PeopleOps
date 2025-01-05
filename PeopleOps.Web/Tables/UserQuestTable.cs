@@ -3,8 +3,8 @@ using Supabase.Postgrest.Models;
 
 namespace PeopleOps.Web.Tables;
 
-[Table("profile_quests")]
-public class ProfileQuestTable : BaseModel
+[Table("user_quests")]
+public class UserQuestTable : BaseModel
 {
     [PrimaryKey("id")]
     public long Id { get; set; }
@@ -12,8 +12,8 @@ public class ProfileQuestTable : BaseModel
     [Column("created_at")]
     public DateTime CreatedAt { get; set; }
     
-    [Column("profile_id")]
-    public long ProfileId { get; set; }
+    [Column("user_id")]
+    public Guid UserId { get; set; }
     
     [Column("quest_id")]
     public long QuestId { get; set; }
