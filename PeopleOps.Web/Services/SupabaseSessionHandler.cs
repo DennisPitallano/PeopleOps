@@ -9,7 +9,7 @@ namespace PeopleOps.Web.Services;
 public class RedisSessionHandler : Supabase.Gotrue.Interfaces.IGotrueSessionPersistence<Session>
 {
     private readonly IDatabase _database;
-    private readonly RedisKey _sessionKey = new("session");
+    private readonly RedisKey _sessionKey = new("authSession");
     public RedisSessionHandler()
     {
         var muxer = ConnectionMultiplexer.Connect(

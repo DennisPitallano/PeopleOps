@@ -9,15 +9,15 @@ public static class SignInAttendance
 {
     //command to sign in attendance
 
-    public class Command : IRequest<AttendanceResponse>
+    public class Command : IRequest<AttendanceTableResponse>
     {
         public int Id { get; set; }
     }
 
     // handler to sign in attendance
-    internal sealed class Handler(Client supabaseClient) : IRequestHandler<Command, AttendanceResponse>
+    internal sealed class Handler(Client supabaseClient) : IRequestHandler<Command, AttendanceTableResponse>
     {
-        public async Task<AttendanceResponse> Handle(Command request, CancellationToken cancellationToken)
+        public async Task<AttendanceTableResponse> Handle(Command request, CancellationToken cancellationToken)
         {
             var attendance = await supabaseClient.From<AttendanceTable>()
                 .Where(p => p.Id == request.Id)
@@ -25,12 +25,12 @@ public static class SignInAttendance
                 .Update(cancellationToken: cancellationToken).ConfigureAwait(false);
             
             var updatedAttendance = attendance.Models.Single();
-            return new AttendanceResponse
+            return new AttendanceTableResponse
             {
                 Id = updatedAttendance.Id,
                 CreatedAt = updatedAttendance.CreatedAt,
                 ActivityDate = updatedAttendance.ActivityDate,
-                ProfileId = updatedAttendance.ProfileId,
+                UserId = updatedAttendance.UserId,
                 TimeIn = updatedAttendance.TimeIn,
                 TimeOut = updatedAttendance.TimeOut
             };

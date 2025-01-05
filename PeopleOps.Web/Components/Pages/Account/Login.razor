@@ -1,23 +1,21 @@
 ﻿@page "/Login"
 @using System.ComponentModel.DataAnnotations
-@using System.Security.Claims
 @using PeopleOps.Web.Components.Layout
 @using PeopleOps.Web.Extensions
 @using PeopleOps.Web.Services
-@using Supabase.Gotrue
-@using Client = Supabase.Client
-@inject Client supabase
 @inject AuthenticationStateProvider AuthenticationStateProvider
-@inject IJSRuntime JsRuntime
 @layout LogInLayout
 @rendermode InteractiveServer
-
 <div style="" >
     <FluentGrid Justify="JustifyContent.Center" AdaptiveRendering="true">
-        <FluentGridItem xs="12" sm="4" lg="3" md="3">
-            <FluentCard Style="padding-left: 1.5rem; padding-right: 1.5rem;">
-                <h2>Login</h2>
-                <EditForm Model="@_loginModel" OnValidSubmit="@HandleValidSubmit">
+        <FluentGridItem Justify="JustifyContent.Center" xs="12" sm="4" lg="3" md="3">
+            <FluentCard Style="padding-left:3rem; padding-right:3rem;">
+                <div style="text-align:center; padding:1rem;">
+                    <h4>Sign in</h4>
+                    Need an account? <FluentAnchor Appearance="Appearance.Hypertext" Href="/Signup">Sign up</FluentAnchor>
+                </div>
+                <FluentDivider Style="padding-bottom:10px; padding-top:5px;" Orientation="Orientation.Horizontal" Role="DividerRole.Presentation"></FluentDivider>
+                <EditForm FormName="signInForm" Model="@_loginModel" OnValidSubmit="@HandleValidSubmit">
                     <DataAnnotationsValidator/>
                     <ValidationSummary/>
                     <FluentTextField Label="Email" Style="width:100%;" @bind-Value="_loginModel.Email" Required="true">
@@ -26,8 +24,8 @@
                     <FluentTextField Label="Password" Style="width:100%;" Type="password" Required="true" @bind-Value="_loginModel.Password">
                         <FluentIcon Value="@(new Icons.Regular.Size16.Key())" Slot="start" Color="Color.Neutral" />
                     </FluentTextField>
-                    <div style="text-align: center; padding:10px;">
-                        <FluentButton Type="ButtonType.Submit" Appearance="Appearance.Accent">Login</FluentButton>
+                    <div style="text-align: center; padding-bottom:15px; padding-top:2rem; ">
+                        <FluentButton Style="width:100%" Type="ButtonType.Submit" Appearance="Appearance.Accent">Login</FluentButton>
                     </div>
                 </EditForm>
             </FluentCard>
@@ -56,10 +54,6 @@
         
         if (result.IsSuccess)
         {
-            var userIdentity = new ClaimsIdentity(CookieAuthenticationDefaults.AuthenticationScheme);
-            
-            var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
-            var user = authState.User;
             NavigationManager.NavigateTo(string.IsNullOrEmpty(ReturnUrl) ? "/" : ReturnUrl, true);
         }
         else

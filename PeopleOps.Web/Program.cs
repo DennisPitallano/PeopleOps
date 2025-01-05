@@ -85,6 +85,7 @@ var options = new SupabaseOptions
     AutoConnectRealtime = true,
     //SessionHandler = new InMemorySessionHandler()
     SessionHandler = new RedisSessionHandler()
+    
 };
 // Note the creation as a singleton.
 builder.Services.AddSingleton(_ => new Client(url, key, options));

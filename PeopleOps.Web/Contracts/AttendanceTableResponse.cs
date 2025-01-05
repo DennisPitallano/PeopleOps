@@ -1,17 +1,25 @@
-﻿namespace PeopleOps.Web.Contracts;
+﻿using System.Text.Json.Serialization;
 
-public class AttendanceResponse
+namespace PeopleOps.Web.Contracts;
+
+public class AttendanceTableResponse 
 {
+    [JsonPropertyName("id")]
     public long Id { get; set; }
     
+    [JsonPropertyName("created_at")]
     public DateTime CreatedAt { get; set; }
     
-    public long ProfileId { get; set; }
+    [JsonPropertyName("user_id")]
+    public Guid UserId { get; set; }
     
+    [JsonPropertyName("login_time")]
     public DateTime? TimeIn { get; set; }
     
+    [JsonPropertyName("logout_time")]
     public DateTime? TimeOut { get; set; }
     
+    [JsonPropertyName("activity_date")]
     public DateTime ActivityDate { get; set; }
 
     public string DisplayDate => ActivityDate.ToString("MMM dd");
@@ -35,6 +43,5 @@ public class AttendanceResponse
     public bool IsFutureDay => ActivityDate.Date > DateTime.Now.Date;
 
     public string NotCurrentDayStyle => IsCurrentDay ? "padding:15px;" : "padding:15px; opacity: 0.6;";
-    
     
 }

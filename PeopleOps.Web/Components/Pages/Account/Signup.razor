@@ -1,0 +1,90 @@
+﻿@page "/Signup"
+@using PeopleOps.Web.Components.Layout
+@using PeopleOps.Web.Extensions
+@using PeopleOps.Web.Models
+@using PeopleOps.Web.Services
+@rendermode InteractiveServer
+@layout LogInLayout
+@inject IDialogService DialogService
+<div>
+    <FluentGrid Justify="JustifyContent.Center" AdaptiveRendering="true">
+        <FluentGridItem Justify="JustifyContent.Center" xs="12" sm="4" lg="3" md="3">
+            <FluentCard AreaRestricted="false" Style="padding-left:3rem; padding-right:3rem;">
+                <div style="text-align:center; padding:1rem;">
+                    <h4>Sign in</h4>
+                    Need an account?
+                    <FluentAnchor Appearance="Appearance.Hypertext" Href="/Signup">Sign up</FluentAnchor>
+                </div>
+                <FluentDivider Style="padding-bottom:10px; padding-top:5px;" Orientation="Orientation.Horizontal"
+                               Role="DividerRole.Presentation"></FluentDivider>
+                <FluentEditForm FormName="signupForm" Model="_registerModel" OnValidSubmit="HandleValidSubmit">
+                    <DataAnnotationsValidator/>
+                    <FluentStack Orientation="Orientation.Vertical" VerticalGap="2">
+                        <FluentTextField Label="Email" Style="width:100%;" @bind-Value="_registerModel.Email"
+                                         TextFieldType="TextFieldType.Email" InputMode="InputMode.Email"/>
+                        <FluentTextField Label="Password" Style="width:100%;" @bind-Value="_registerModel.Password"
+                                         TextFieldType="TextFieldType.Password"/>
+                        <FluentTextField Label="Confirm Password" Style="width:100%;"
+                                         @bind-Value="_registerModel.ConfirmPassword"
+                                         TextFieldType="TextFieldType.Password"/>
+                        <FluentTextField Label="First Name" Style="width:100%;" @bind-Value="_registerModel.FirstName"/>
+                        <FluentTextField Label="Last Name" Style="width:100%;" @bind-Value="_registerModel.LastName"/>
+                    </FluentStack>
+                    <div style="text-align: center; padding-bottom:15px; padding-top:2rem; ">
+                        <FluentButton IconEnd="@(new Icons.Regular.Size16.Rocket())" Style="width:100%"
+                                      Type="ButtonType.Submit" Appearance="Appearance.Accent">Submit
+                        </FluentButton>
+                    </div>
+                    <div>
+                        <FluentValidationSummary style="color:darkred"/>
+                    </div>
+                </FluentEditForm>
+            </FluentCard>
+        </FluentGridItem>
+    </FluentGrid>
+</div>
+
+@code {
+    private readonly RegisterModel _registerModel = new();
+
+    [Inject] AuthService AuthService { get; set; } = default!;
+    [Inject] NavigationManager NavigationManager { get; set; } = default!;
+    string? _error;
+    bool? _canceled;
+
+    private async Task HandleValidSubmit()
+    {
+         var result = await AuthService.RegisterAsync(_registerModel);
+
+        if (result.IsSuccess)
+        {
+            NavigationManager.NavigateTo("/profile", true);
+        }
+        else
+        {
+            _error = result.Errors.ToStringError();
+            var dialog = await DialogService.ShowMessageBoxAsync(new DialogParameters<MessageBoxContent>()
+            {
+                Content = new()
+                {
+                    Title = "😩 Failed to sign up!",
+                    MarkupMessage = new MarkupString($"<b>{_error}</b>"),
+                    Icon = new Icons.Filled.Size48.ErrorCircle(),
+                    IconColor = Color.Error,
+                },
+                PrimaryAction = "",
+                SecondaryAction = "OK",
+                PreventDismissOnOverlayClick = true,
+                Width = "300px",
+            });
+            var dialogResult = await dialog.Result;
+            _canceled = dialogResult.Cancelled;
+        }
+    }
+
+    protected override async Task<Task> OnAfterRenderAsync(bool firstRender)
+    {
+        return base.OnAfterRenderAsync(firstRender);
+    }
+
+}

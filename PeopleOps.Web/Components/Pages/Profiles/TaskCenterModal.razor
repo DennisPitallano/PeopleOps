@@ -1,6 +1,7 @@
 ﻿@using MediatR
 @using PeopleOps.Web.Contracts
 @using PeopleOps.Web.Features.Attendance
+@using PeopleOps.Web.Features.Profile
 @using Client = Supabase.Client
 @using Supabase.Gotrue
 @implements IDialogContentComponent<PeopleOps.Web.Contracts.ProfileResponse>
@@ -197,13 +198,21 @@
 
     [Parameter] public ProfileResponse Content { get; set; }
 
-    private List<AttendanceResponse> AttendanceResponses { get; set; } = new List<AttendanceResponse>();
-
+    private List<AttendanceTableResponse> AttendanceResponses { get; set; } = [];
+    
+    private List<DailyQuestTableResponse> DailyQuestResponses { get; set; } = [];
+    
+    User? _user = new();
+    
     protected override async Task<Task> OnInitializedAsync()
     {
-        User? user = supabase.Auth.CurrentUser;
+        _user = supabase.Auth.CurrentUser;
         //get the attendance of the user
-        AttendanceResponses = await Sender.Send(new GetAttendanceByProfile.Query { ProfileId = 1 });
+        AttendanceResponses = await Sender.Send(new GetAttendanceByUser.Query { userid = Guid.Parse(_user?.Id) });
+        
+        //get daily quests
+        DailyQuestResponses = await Sender.Send(new GetDailyQuestsByUser.Query { userid = Guid.Parse(_user?.Id), questgroup = "daily" });
+        
 
         return base.OnInitializedAsync();
     }
@@ -214,7 +223,7 @@
         await Sender.Send(new SignOutAttendance.Command { Id = 13 });
         
         //refresh the attendance
-        AttendanceResponses = await Sender.Send(new GetAttendanceByProfile.Query { ProfileId = 1 });
+        AttendanceResponses = await Sender.Send(new GetAttendanceByUser.Query { userid = Guid.Parse(_user?.Id) });
         
         StateHasChanged();
     }
@@ -225,7 +234,7 @@
         await Sender.Send(new SignInAttendance.Command { Id = 13 });
         
         //refresh the attendance
-        AttendanceResponses = await Sender.Send(new GetAttendanceByProfile.Query { ProfileId = 1 });
+        AttendanceResponses = await Sender.Send(new GetAttendanceByUser.Query { userid =  Guid.Parse(_user?.Id) });
         
         //show message box that the user has signed in successfully with conffeti emoji
         var dialog = await DialogService.ShowMessageBoxAsync(new DialogParameters<MessageBoxContent>()

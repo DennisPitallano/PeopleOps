@@ -4,6 +4,7 @@ using System.Text.Json;
 using FluentResults;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
+using Microsoft.Extensions.Caching.Hybrid;
 using Microsoft.Extensions.Caching.Memory;
 using PeopleOps.Web.Helpers;
 using PeopleOps.Web.Models;
@@ -18,16 +19,17 @@ public class AuthService
 
     private readonly NavigationManager _navigation;
     private readonly IConfiguration _configuration;
-    private readonly Supabase.Client _supabase;
+    private readonly Supabase.Client _supaBaseClient;
     private readonly ProtectedLocalStorage _localStorage;
     private readonly RedisSessionHandler _sessionHandler;
-    private readonly IMemoryCache _memoryCache;
-    public AuthService(NavigationManager navigation, IConfiguration configuration, Supabase.Client supabase,
-        ProtectedLocalStorage localStorage, RedisSessionHandler sessionHandler, IMemoryCache memoryCache)
+    private readonly HybridCache _memoryCache;
+
+    public AuthService(NavigationManager navigation, IConfiguration configuration, Supabase.Client supaBaseClient,
+        ProtectedLocalStorage localStorage, RedisSessionHandler sessionHandler, HybridCache memoryCache)
     {
         _navigation = navigation;
         _configuration = configuration;
-        _supabase = supabase;
+        _supaBaseClient = supaBaseClient;
         _localStorage = localStorage;
         _sessionHandler = sessionHandler;
         _memoryCache = memoryCache;
@@ -37,18 +39,18 @@ public class AuthService
     {
         try
         {
-            var response = await _supabase.Auth.SignIn(email, password);
+            var response = await _supaBaseClient.Auth.SignIn(email, password);
             if (string.IsNullOrEmpty(response?.AccessToken))
             {
                 return Result.Fail("An error occured");
             }
+
             // Save session to memory cache
-            await  _memoryCache.GetOrCreateAsync($"authSession-{response.User?.Aud}", entry =>
+            await _memoryCache.GetOrCreateAsync($"authSession-{response.User?.Aud}", async entry =>
             {
-                entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(30);
-                return Task.FromResult(response);
+                return response;
             });
-            
+
             return Result.Ok();
         }
         catch (Exception ex)
@@ -72,7 +74,13 @@ public class AuthService
                 }
             };
 
-            var data = await _supabase.Auth.SignUp(model.Email, model.Password, signUpOptions);
+            var data = await _supaBaseClient.Auth.SignUp(model.Email, model.Password, signUpOptions);
+            // Save session to memory cache
+            await _memoryCache.GetOrCreateAsync($"authSession-{model.Email}", async entry =>
+            {
+                return data;
+            });
+
             return Result.Ok();
         }
         catch (Exception ex)
@@ -90,7 +98,7 @@ public class AuthService
             RedirectTo = $"{_configuration["RedirectUrl"]}account/reset-password",
         };
 
-        await _supabase.Auth.ResetPasswordForEmail(resetPasswordForEmailOptions);
+        await _supaBaseClient.Auth.ResetPasswordForEmail(resetPasswordForEmailOptions);
         return Result.Ok();
     }
 
@@ -103,8 +111,8 @@ public class AuthService
                 Password = model.Password
             };
 
-            var session = await _supabase.Auth.SetSession(model.AccessToken, model.RefreshToken);
-            var user = await _supabase.Auth.Update(userAttributes);
+            var session = await _supaBaseClient.Auth.SetSession(model.AccessToken, model.RefreshToken);
+            var user = await _supaBaseClient.Auth.Update(userAttributes);
 
             if (user is null)
                 return Result.Fail("An error occured");
@@ -119,8 +127,11 @@ public class AuthService
         }
     }
 
-    public async Task LogoutAsync()
+    private async Task LogoutAsync()
     {
+        
+        await _supaBaseClient.Auth.SignOut();
+        
         await RemoveAuthDataFromStorageAsync();
         Thread.Sleep(300);
         _navigation.NavigateTo("/", true);
@@ -129,14 +140,23 @@ public class AuthService
     public async Task<List<Claim>> GetLoginInfoAsync()
     {
         var emptyResult = new List<Claim>();
-       string? accessToken;
-       string? refreshToken;
-        
+        string? accessToken;
+        string? refreshToken;
         try
         {
-            var session = await  _sessionHandler.LoadSessionAsync();
-            accessToken = session?.AccessToken;
-            refreshToken = session?.RefreshToken;
+            // Check if user is already logged in
+            var session = _supaBaseClient.Auth.CurrentSession;
+            if (session != null)
+            {
+                accessToken = session.AccessToken;
+                refreshToken = session.RefreshToken;
+            }
+            else
+            {
+                session = await _sessionHandler.LoadSessionAsync();
+                accessToken = session?.AccessToken;
+                refreshToken = session?.RefreshToken;
+            }
         }
         catch (CryptographicException)
         {
@@ -160,6 +180,7 @@ public class AuthService
         {
             await LogoutAsync();
         }
+
         return claims;
     }
 
@@ -192,6 +213,7 @@ public class AuthService
                 cleanMessage = "Email not confirmed, please check your inbox";
                 break;
         }
+
         return cleanMessage;
     }
 }

@@ -13,8 +13,8 @@
             uri = NavigationManager.ToBaseRelativePath(uri);
         }
         var redirectUrl = $"Login?returnUrl={uri}";
-        NavigationManager.NavigateToIgnoreException(redirectUrl);
-        //HttpContext.HttpRedirectTo(redirectUrl);
+        //NavigationManager.NavigateToIgnoreException(redirectUrl);
+        HttpContext.HttpRedirectTo(redirectUrl);
         //IdentityRedirectManager.RedirectTo(redirectUrl);
     }
 }

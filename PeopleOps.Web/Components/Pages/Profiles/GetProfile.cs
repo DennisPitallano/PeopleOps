@@ -11,7 +11,7 @@ public static class GetProfile
 
     public class Query : IRequest<ProfileResponse>
     {
-        public int Id { get; set; }
+        public Guid Id { get; set; }
     }
 
     // handler to get profile
@@ -27,7 +27,7 @@ public static class GetProfile
             return new ProfileResponse
             {
                 Id = profile.Id,
-                CreatedAt = profile.CreatedAt,
+                UpdatedAt = profile.CreatedAt,
                 FirstName = profile.FirstName,
                 LastName = profile.LastName,
                 DateOfBirth = profile.DateOfBirth,
