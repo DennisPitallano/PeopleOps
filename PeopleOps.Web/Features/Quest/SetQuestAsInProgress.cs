@@ -10,6 +10,7 @@ public static class SetQuestAsInProgress
     public class Command : IRequest<bool>
     {
         public long Id { get; set; }
+        public bool Status { get; set; }
     }
 
     // handler to set quest to in progress
@@ -19,7 +20,7 @@ public static class SetQuestAsInProgress
         {
             var userQuests = await supabaseClient.From<UserQuestTable>()
                 .Where(p => p.Id == request.Id)
-                .Set(x => x.CompletionStatus, true)
+                .Set(x => x.CompletionStatus, request.Status)
                 .Update(cancellationToken: cancellationToken).ConfigureAwait(false);
             
             return userQuests.Models.Any();

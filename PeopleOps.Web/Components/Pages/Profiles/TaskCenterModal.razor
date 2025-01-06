@@ -18,7 +18,7 @@
 <FluentTextField @bind-Value="@Content.Lastname">Your lastname:</FluentTextField>
 <FluentNumberField @bind-Value="@Content.Age">Your age:</FluentNumberField>*@
 <FluentDialogHeader Visible="false"/>
-<FluentTabs ActiveTabId="@_activeTabId" Size="TabSize.Large" Style="text-align:center">
+<FluentTabs ActiveTabId="@_activeTabId" OnTabChange="OnTabChange" Size="TabSize.Large" Style="text-align:center">
     <FluentTab Id="tab-attendance" Style="padding-top:1rem;">
         <Header>
             <FluentEmoji Value="@(new Emojis.TravelPlaces.Flat.Default.ThreeOClock())" Width="18"/>
@@ -88,7 +88,8 @@
                                     else
                                     {
                                         <div>
-                                            <FluentButton OnClick="() => SigninAsync(attendance.Id)" Disabled="@(!attendance.IsCurrentDay)"
+                                            <FluentButton OnClick="() => SigninAsync(attendance.Id)"
+                                                          Disabled="@(!attendance.IsCurrentDay)"
                                                           IconEnd="@(new Icons.Regular.Size16.ClockAlarm())"
                                                           Appearance="Appearance.Accent">
                                                 Sign in
@@ -149,13 +150,16 @@
             </FluentGrid>
         </Content>
     </FluentTab>
-    <FluentTab Id="tab-daily">
+    <FluentTab Id="tab-daily" DeferredLoading="true">
         <Header>
             <FluentEmoji Value="@(new Emojis.PeopleBody.Flat.Default.Technologist())" Width="18"/>
             <span style="color:chocolate;">
                 Daily
             </span>
         </Header>
+        <LoadingContent>
+            <FluentProgressRing/>
+        </LoadingContent>
         <Content>
             <FluentGrid Spacing="2" Justify="JustifyContent.SpaceAround">
                 @if (DailyQuestResponses.Count == 0)
@@ -188,10 +192,10 @@
                     </FluentStack>
                     <FluentDivider Orientation="Orientation.Horizontal"></FluentDivider>
 
-                    <FluentAccordion ExpandMode="AccordionExpandMode.Single">
+                    <FluentAccordion ExpandMode="AccordionExpandMode.Multi">
                         @foreach (var quest in DailyMainQuests)
                         {
-                            <FluentAccordionItem Heading="@quest.QuestName">
+                            <FluentAccordionItem HeadingLevel="1" Heading="@quest.QuestName">
                                 <div slot="end">
                                     <FluentStack HorizontalGap="3" Style="padding:3px;"
                                                  Orientation="Orientation.Horizontal"
@@ -203,33 +207,44 @@
                                                 @quest.QuestPoints
                                             </FluentLabel>
                                         </FluentBadge>
-                                        @if(quest.CompletionStatus)
+                                        @if (quest.CompletionStatus)
                                         {
                                             <FluentBadge Circular=true Appearance="Appearance.Accent">
                                                 In Progress
                                             </FluentBadge>
                                         }
                                     </FluentStack>
-                                   
+
                                 </div>
-                                <FluentStack Orientation="Orientation.Vertical" VerticalAlignment="VerticalAlignment.Center" 
+                                <FluentStack Orientation="Orientation.Vertical"
+                                             VerticalAlignment="VerticalAlignment.Center"
                                              HorizontalAlignment="HorizontalAlignment.Center" VerticalGap="3">
                                     <div>
                                         @quest.QuestDescription
                                     </div>
                                     @if (!quest.CompletionStatus)
                                     {
-                                        <FluentButton OnClick="() => SetQuestAsInProgress(quest.Id)" IconEnd="@(new Icons.Filled.Size16.ArrowCircleRight())"
+                                        <FluentButton OnClick="() => SetQuestAsInProgress(quest.Id, true)"
+                                                      IconEnd="@(new Icons.Filled.Size16.ArrowCircleRight())"
                                                       Appearance="Appearance.Accent">
                                             Start Quest
                                         </FluentButton>
                                     }
-                                    @if(quest is { CompletionStatus: true, CompletionDate: null })
+                                    @if (quest is { CompletionStatus: true, CompletionDate: null })
                                     {
-                                        <FluentButton IconEnd="@(new Icons.Filled.Size16.CheckmarkCircle())"
-                                                      Appearance="Appearance.Accent">
-                                            Complete Quest
-                                        </FluentButton>
+                                        <FluentStack Orientation="Orientation.Horizontal" HorizontalGap="5" 
+                                                     HorizontalAlignment="HorizontalAlignment.Center" Style="padding:10px;">
+                                            <FluentButton IconEnd="@(new Icons.Filled.Size16.CheckmarkCircle())"
+                                                          Appearance="Appearance.Accent">
+                                                Complete Quest
+                                            </FluentButton>
+
+                                            <FluentButton IconEnd="@(new Icons.Filled.Size16.ArrowRedo())"
+                                                          OnClick="() => SetQuestAsInProgress(quest.Id,false)"
+                                                          Appearance="Appearance.Outline" Color="darkred">
+                                                Cancel Quest
+                                            </FluentButton>
+                                        </FluentStack>
                                     }
                                 </FluentStack>
                             </FluentAccordionItem>
@@ -245,11 +260,61 @@
                                      Width="18"/>
                     </FluentStack>
                     <FluentDivider Orientation="Orientation.Horizontal"></FluentDivider>
-                    <FluentAccordion ExpandMode="AccordionExpandMode.Single">
+                    <FluentAccordion ExpandMode="AccordionExpandMode.Multi">
                         @foreach (var quest in DailySideQuests)
                         {
-                            <FluentAccordionItem Heading="@quest.QuestName">
-                                @quest.QuestDescription
+                             <FluentAccordionItem HeadingLevel="1" Heading="@quest.QuestName">
+                                <div slot="end">
+                                    <FluentStack HorizontalGap="3" Style="padding:3px;"
+                                                 Orientation="Orientation.Horizontal"
+                                                 VerticalAlignment="VerticalAlignment.Center">
+                                        <FluentBadge Circular=true Appearance="Appearance.Neutral">
+                                            <img alt="" width="16" class="h-10 max-w-full"
+                                                 src="/assets/media/images/gamer-coin.svg">
+                                            <FluentLabel Typo="Typography.H6" Style="color:darkgoldenrod;">
+                                                @quest.QuestPoints
+                                            </FluentLabel>
+                                        </FluentBadge>
+                                        @if (quest.CompletionStatus)
+                                        {
+                                            <FluentBadge Circular=true Appearance="Appearance.Accent">
+                                                In Progress
+                                            </FluentBadge>
+                                        }
+                                    </FluentStack>
+
+                                </div>
+                                <FluentStack Orientation="Orientation.Vertical"
+                                             VerticalAlignment="VerticalAlignment.Center"
+                                             HorizontalAlignment="HorizontalAlignment.Center" VerticalGap="3">
+                                    <div>
+                                        @quest.QuestDescription
+                                    </div>
+                                    @if (!quest.CompletionStatus)
+                                    {
+                                        <FluentButton OnClick="() => SetQuestAsInProgress(quest.Id,true)"
+                                                      IconEnd="@(new Icons.Filled.Size16.ArrowCircleRight())"
+                                                      Appearance="Appearance.Accent">
+                                            Start Quest
+                                        </FluentButton>
+                                    }
+                                    @if (quest is { CompletionStatus: true, CompletionDate: null })
+                                    {
+                                        <FluentStack Orientation="Orientation.Horizontal" HorizontalGap="5" 
+                                                     HorizontalAlignment="HorizontalAlignment.Center" Style="padding:10px;">
+                                            <FluentButton IconEnd="@(new Icons.Filled.Size16.CheckmarkCircle())"
+                                                          Appearance="Appearance.Accent">
+                                                Complete Quest
+                                            </FluentButton>
+
+                                            <FluentButton IconEnd="@(new Icons.Filled.Size16.ArrowRedo())"
+                                                          OnClick="() => SetQuestAsInProgress(quest.Id,false)"
+                                                          Appearance="Appearance.Outline" Color="darkred">
+                                                Cancel Quest
+                                            </FluentButton>
+                                        </FluentStack>
+                                    }
+                                </FluentStack>
                             </FluentAccordionItem>
                         }
                     </FluentAccordion>
@@ -301,9 +366,9 @@
     private List<DailyQuestTableResponse> DailySideQuests { get; set; } = [];
 
     User? _user = new();
-    
-    string _activeTabId = "tab-attendance";
-    
+
+    string? _activeTabId = "tab-attendance";
+
     protected override async Task<Task> OnInitializedAsync()
     {
         _user = supabase.Auth.CurrentUser;
@@ -329,33 +394,31 @@
     // initialize the daily quests
     private async Task InitializeDailyQuests()
     {
-        _activeTabId = "tab-daily";
         //get daily quests
         var isGenerated = await Sender.Send(new GenerateDailyQuest.Command { userid = Content.Id });
 
         if (isGenerated)
         {
-           await LoadDailyQuests();
+            await LoadDailyQuests();
         }
+
         StateHasChanged();
     }
-    
+
     // set quest as in progress
-    private async Task SetQuestAsInProgress(long questId)
+    private async Task SetQuestAsInProgress(long questId, bool status)
     {
-        _activeTabId = "tab-daily";
-        var isSuccess =  await Sender.Send(new SetQuestAsInProgress.Command { Id = questId });
+        var isSuccess = await Sender.Send(new SetQuestAsInProgress.Command { Id = questId, Status = status });
         if (isSuccess)
         {
             await LoadDailyQuests();
         }
+
         StateHasChanged();
     }
-
     // sign out
     private async Task SignOutAsync(int attendanceId)
     {
-        _activeTabId = "tab-attendance";
         await Sender.Send(new SignOutAttendance.Command { Id = attendanceId });
         //refresh the attendance
         AttendanceResponses = await Sender.Send(new GetAttendanceByUser.Query { userid = Content.Id });
@@ -366,7 +429,6 @@
     // sign in
     private async Task SigninAsync(int attendanceId)
     {
-        _activeTabId = "tab-attendance";
         await Sender.Send(new SignInAttendance.Command { Id = attendanceId });
         //refresh the attendance
         AttendanceResponses = await Sender.Send(new GetAttendanceByUser.Query { userid = Content.Id });
@@ -391,4 +453,8 @@
         StateHasChanged();
     }
 
+    private void OnTabChange(FluentTab obj)
+    {
+        _activeTabId = obj.Id;
+    }
 }

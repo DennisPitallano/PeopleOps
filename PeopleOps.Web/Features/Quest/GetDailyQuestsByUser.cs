@@ -23,9 +23,9 @@ public static class GetDailyQuestsByUser
         {
             List<DailyQuestTableResponse> dailyQuests = [];
             //get all daily quests for the day
-            request.quest_date = DateTime.Now.Date;
+            request.quest_date = DateTime.UtcNow.Date;
             var baseResponse = await supabaseClient.Rpc("get_daily_user_quests",
-                    new {  request.quest_date,request.questgroup,request.userid})
+                    new { request.quest_date,request.questgroup,request.userid})
                 .ConfigureAwait(false);
             //convert the response to a list of daily quests quest_date, questgroup, userid
             if (baseResponse.ResponseMessage is { IsSuccessStatusCode: true })
