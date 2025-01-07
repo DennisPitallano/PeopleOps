@@ -28,15 +28,15 @@ public class ProfileTable: BaseModel
     public DateTime? DateOfBirth { get; set; }
     
     [Column("gender")]
-    public bool Gender { get; set; }
+    public bool? Gender { get; set; }
     
     [Column("email")]
     public string Email { get; set; }
     
     [Column("job_title")]
-    public string JobTitle { get; set; }
+    public string? JobTitle { get; set; }
     
     [Column("city_address")]
-    public string CityAddress { get; set; }
+    public string? CityAddress { get; set; }
     
 }

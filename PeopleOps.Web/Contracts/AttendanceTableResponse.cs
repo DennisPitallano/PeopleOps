@@ -20,7 +20,7 @@ public class AttendanceTableResponse
     public DateTime? TimeOut { get; set; }
     
     [JsonPropertyName("activity_date")]
-    public DateTime ActivityDate { get; set; }
+    public DateTimeOffset ActivityDate { get; set; }
 
     public string DisplayDate => ActivityDate.ToString("MMM dd");
     

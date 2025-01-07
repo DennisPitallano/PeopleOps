@@ -23,7 +23,7 @@ public static class GetDailyQuestsByUser
         {
             List<DailyQuestTableResponse> dailyQuests = [];
             //get all daily quests for the day
-            request.quest_date = DateTime.UtcNow.Date;
+            request.quest_date = DateTimeOffset.Now.Date;
             var baseResponse = await supabaseClient.Rpc("get_daily_user_quests",
                     new { request.quest_date,request.questgroup,request.userid})
                 .ConfigureAwait(false);

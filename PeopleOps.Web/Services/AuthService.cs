@@ -46,10 +46,8 @@ public class AuthService
             }
 
             // Save session to memory cache
-            await _memoryCache.GetOrCreateAsync($"authSession-{response.User?.Aud}", async entry =>
-            {
-                return response;
-            });
+            await _memoryCache.GetOrCreateAsync($"authSession-{response.User?.Aud}",
+                async entry => { return response; });
 
             return Result.Ok();
         }
@@ -71,15 +69,18 @@ public class AuthService
                 {
                     { "first_name", model.FirstName },
                     { "last_name", model.LastName },
+                    { "full_name", $"{model.FirstName} {model.LastName}" }
                 }
             };
 
             var data = await _supaBaseClient.Auth.SignUp(model.Email, model.Password, signUpOptions);
-            // Save session to memory cache
-            await _memoryCache.GetOrCreateAsync($"authSession-{model.Email}", async entry =>
+            if (data?.AccessToken is not null)
             {
-                return data;
-            });
+                await LoginAsync(model.Email, model.Password);
+            }
+            
+            // Save session to memory cache
+            await _memoryCache.GetOrCreateAsync($"authSession-{model.Email}", async entry => { return data; });
 
             return Result.Ok();
         }
@@ -129,9 +130,8 @@ public class AuthService
 
     private async Task LogoutAsync()
     {
-        
         await _supaBaseClient.Auth.SignOut();
-        
+
         await RemoveAuthDataFromStorageAsync();
         Thread.Sleep(300);
         _navigation.NavigateTo("/", true);
