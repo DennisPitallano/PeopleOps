@@ -10,7 +10,7 @@ public class AttendanceTable : BaseModel
     public int Id { get; set; }
     
     [Column("created_at")]
-    public DateTime CreatedAt { get; set; }
+    public DateTime? CreatedAt { get; set; }
     
     [Column("user_id")]
     public Guid UserId { get; set; }
@@ -22,5 +22,5 @@ public class AttendanceTable : BaseModel
     public DateTime? TimeOut { get; set; }
     
     [Column("activity_date")]
-    public DateTime ActivityDate { get; set; }
+    public DateOnly ActivityDate { get; set; }
 }

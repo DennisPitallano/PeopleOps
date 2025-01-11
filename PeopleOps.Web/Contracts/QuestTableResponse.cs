@@ -2,7 +2,7 @@
 
 namespace PeopleOps.Web.Contracts;
 
-public class DailyQuestTableResponse
+public class QuestTableResponse
 {
     [JsonPropertyName("id")]
     public long Id { get; set; }

@@ -8,7 +8,7 @@ public class AttendanceTableResponse
     public int Id { get; set; }
     
     [JsonPropertyName("created_at")]
-    public DateTime CreatedAt { get; set; }
+    public DateTime? CreatedAt { get; set; }
     
     [JsonPropertyName("user_id")]
     public Guid UserId { get; set; }
@@ -20,7 +20,7 @@ public class AttendanceTableResponse
     public DateTime? TimeOut { get; set; }
     
     [JsonPropertyName("activity_date")]
-    public DateTimeOffset ActivityDate { get; set; }
+    public DateOnly ActivityDate { get; set; }
 
     public string DisplayDate => ActivityDate.ToString("MMM dd");
     
@@ -36,11 +36,11 @@ public class AttendanceTableResponse
     
     public bool IsPresent => TimeIn.HasValue && TimeOut.HasValue;
 
-    public bool IsCurrentDay => ActivityDate.Date == DateTime.Now.Date;
+    public bool IsCurrentDay => ActivityDate == DateOnly.FromDateTime(DateTime.Now.Date);
     
-    public bool IsMissedThisDay => !IsPresent && ActivityDate.Date < DateTime.Now.Date;
+    public bool IsMissedThisDay => !IsPresent && ActivityDate < DateOnly.FromDateTime(DateTime.Now.Date);
     
-    public bool IsFutureDay => ActivityDate.Date > DateTime.Now.Date;
+    public bool IsFutureDay => ActivityDate > DateOnly.FromDateTime(DateTime.Now.Date);
 
     public string NotCurrentDayStyle => IsCurrentDay ? "padding:15px;" : "padding:15px; opacity: 0.6;";
     

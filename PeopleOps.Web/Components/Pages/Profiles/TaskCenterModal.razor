@@ -28,124 +28,149 @@
         </Header>
         <Content>
             <FluentGrid Spacing="2" Justify="JustifyContent.Center">
-                @foreach (var attendance in AttendanceResponses)
+                @if (AttendanceResponses.Count == 0)
                 {
-                    <FluentGridItem xs="4">
-                        <FluentCard MinimalStyle="true" Style="@attendance.NotCurrentDayStyle" AreaRestricted="false">
-                            <FluentLabel Typo="Typography.H6" Alignment="HorizontalAlignment.Center">
-                                @if (attendance.IsPresent)
-                                {
-                                    <FluentEmoji Style="margin-right:3px;"
-                                                 Value="@(new Emojis.Activities.Color.Default.ConfettiBall())"
-                                                 Slot="start" Width="22"/>
-                                }
-                                <FluentLabel>
-                                    @attendance.DisplayDate
+                    <FluentStack Orientation="Orientation.Vertical"
+                                 VerticalAlignment="VerticalAlignment.Center"
+                                 VerticalGap="2" Style="padding:1rem;"
+                                 HorizontalAlignment="HorizontalAlignment.Center">
+                        <FluentLabel Typo="Typography.H6" Alignment="HorizontalAlignment.Center"
+                                     Style="margin-bottom:15px;">
+                            Are you ready to sign in?
+                        </FluentLabel>
+                        <FluentButton OnClick="() => InitializeWeeklyAttendance()"
+                                      IconEnd="@(new Icons.Regular.Size16.CalendarCheckmark())"
+                                      Appearance="Appearance.Accent">
+                            I'm ready!
+                        </FluentButton>
+                    </FluentStack>
+                }
+                else
+                {
+                    foreach (var attendance in AttendanceResponses)
+                    {
+                        <FluentGridItem xs="4">
+                            <FluentCard MinimalStyle="true" Style="@attendance.NotCurrentDayStyle"
+                                        AreaRestricted="false">
+                                <FluentLabel Typo="Typography.H6" Alignment="HorizontalAlignment.Center">
+                                    @if (attendance.IsPresent)
+                                    {
+                                        <FluentEmoji Style="margin-right:3px;"
+                                                     Value="@(new Emojis.Activities.Color.Default.ConfettiBall())"
+                                                     Slot="start" Width="22"/>
+                                    }
+                                    <FluentLabel>
+                                        @attendance.DisplayDate
+                                    </FluentLabel>
                                 </FluentLabel>
-                            </FluentLabel>
-                            <FluentDivider Role="DividerRole.Presentation"></FluentDivider>
-                            @if (attendance.IsMissedThisDay)
-                            {
-                                <FluentStack Orientation="Orientation.Vertical" VerticalGap="1"
-                                             VerticalAlignment="VerticalAlignment.Center"
-                                             HorizontalAlignment="HorizontalAlignment.Center" Style="margin-top:10px;">
-                                    <img src="assets/media/images/absent.png" style="width:100px;" alt="missed"/>
-                                    <div>
-                                        <FluentStack HorizontalGap="1" Style="padding:3px;"
-                                                     Orientation="Orientation.Horizontal"
-                                                     VerticalAlignment="VerticalAlignment.Center">
-                                            <FluentBadge Circular=true Appearance="Appearance.Neutral">
-                                                <img alt="" width="30" class="h-10 max-w-full"
-                                                     src="/assets/media/images/gamer-coin.svg">
-                                                <FluentLabel Typo="Typography.H4" Style="color:darkgoldenrod;">0
-                                                </FluentLabel>
-                                            </FluentBadge>
-                                        </FluentStack>
-                                    </div>
-                                </FluentStack>
-                            }
-                            else
-                            {
-                                <FluentStack Orientation="Orientation.Vertical" VerticalGap="1"
-                                             VerticalAlignment="VerticalAlignment.Center"
-                                             HorizontalAlignment="HorizontalAlignment.Center" Style="margin-top:10px;">
-                                    @if (attendance.TimeIn != null)
-                                    {
+                                <FluentDivider Role="DividerRole.Presentation"></FluentDivider>
+                                @if (attendance.IsMissedThisDay)
+                                {
+                                    <FluentStack Orientation="Orientation.Vertical" VerticalGap="1"
+                                                 VerticalAlignment="VerticalAlignment.Center"
+                                                 HorizontalAlignment="HorizontalAlignment.Center"
+                                                 Style="margin-top:10px;">
+                                        <img src="assets/media/images/absent.png" style="width:100px;" alt="missed"/>
                                         <div>
-                                            <FluentButton Id="@attendance.DisplayTimeInId"
-                                                          IconEnd="@(new Icons.Regular.Size16.CalendarCheckmark())"
-                                                          Appearance="Appearance.Stealth">
-                                                <FluentBadge Appearance="Appearance.Accent">
-                                                    @attendance.DisplayTimeIn
+                                            <FluentStack HorizontalGap="1" Style="padding:3px;"
+                                                         Orientation="Orientation.Horizontal"
+                                                         VerticalAlignment="VerticalAlignment.Center">
+                                                <FluentBadge Circular=true Appearance="Appearance.Neutral">
+                                                    <img alt="" width="30" class="h-10 max-w-full"
+                                                         src="/assets/media/images/gamer-coin.svg">
+                                                    <FluentLabel Typo="Typography.H4" Style="color:darkgoldenrod;">0
+                                                    </FluentLabel>
                                                 </FluentBadge>
-                                            </FluentButton>
-                                            <FluentTooltip Anchor="@attendance.DisplayTimeInId"
-                                                           HideTooltipOnCursorLeave="true" Position=TooltipPosition.Top
-                                                           Delay=200>Time In
-                                            </FluentTooltip>
+                                            </FluentStack>
                                         </div>
-                                    }
-                                    else
-                                    {
-                                        <div>
-                                            <FluentButton OnClick="() => SigninAsync(attendance.Id)"
-                                                          Disabled="@(!attendance.IsCurrentDay)"
-                                                          IconEnd="@(new Icons.Regular.Size16.ClockAlarm())"
-                                                          Appearance="Appearance.Accent">
-                                                Sign in
-                                            </FluentButton>
-                                        </div>
-                                    }
+                                    </FluentStack>
+                                }
+                                else
+                                {
+                                    <FluentStack Orientation="Orientation.Vertical" VerticalGap="1"
+                                                 VerticalAlignment="VerticalAlignment.Center"
+                                                 HorizontalAlignment="HorizontalAlignment.Center"
+                                                 Style="margin-top:10px;">
+                                        @if (attendance.TimeIn != null)
+                                        {
+                                            <div>
+                                                <FluentButton Id="@attendance.DisplayTimeInId"
+                                                              IconEnd="@(new Icons.Regular.Size16.CalendarCheckmark())"
+                                                              Appearance="Appearance.Stealth">
+                                                    <FluentBadge Appearance="Appearance.Accent">
+                                                        @attendance.DisplayTimeIn
+                                                    </FluentBadge>
+                                                </FluentButton>
+                                                <FluentTooltip Anchor="@attendance.DisplayTimeInId"
+                                                               HideTooltipOnCursorLeave="true"
+                                                               Position=TooltipPosition.Top
+                                                               Delay=200>Time In
+                                                </FluentTooltip>
+                                            </div>
+                                        }
+                                        else
+                                        {
+                                            <div>
+                                                <FluentButton OnClick="() => SigninAsync(attendance.Id)"
+                                                              Disabled="@(!attendance.IsCurrentDay)"
+                                                              IconEnd="@(new Icons.Regular.Size16.ClockAlarm())"
+                                                              Appearance="Appearance.Accent">
+                                                    Sign in
+                                                </FluentButton>
+                                            </div>
+                                        }
 
-                                    @if (attendance is { TimeIn: not null, TimeOut: null })
-                                    {
-                                        <div>
-                                            <FluentButton OnClick="() => SignOutAsync(attendance.Id)"
-                                                          IconEnd="@(new Icons.Regular.Size16.ClockAlarm())"
-                                                          Appearance="Appearance.Outline" Color="darkred">
-                                                Sign out
-                                            </FluentButton>
-                                        </div>
-                                    }
-                                    @if (attendance.TimeOut != null)
-                                    {
-                                        <div>
-                                            <FluentButton Id="@attendance.DisplayTimeOutId" Color="green"
-                                                          Style="font-weight:bold;"
-                                                          IconEnd="@(new Icons.Regular.Size16.CalendarCheckmark())"
-                                                          Appearance="Appearance.Stealth">
-                                                <FluentBadge Appearance="Appearance.Accent">
-                                                    @attendance.DisplayTimeOut
-                                                </FluentBadge>
-                                            </FluentButton>
-                                            <FluentTooltip Anchor="@attendance.DisplayTimeOutId"
-                                                           HideTooltipOnCursorLeave="true" Position=TooltipPosition.Top
-                                                           Delay=200>Time Out
-                                            </FluentTooltip>
-                                        </div>
-                                    }
-                                    @*<div>
+                                        @if (attendance is { TimeIn: not null, TimeOut: null })
+                                        {
+                                            <div>
+                                                <FluentButton OnClick="() => SignOutAsync(attendance.Id)"
+                                                              IconEnd="@(new Icons.Regular.Size16.ClockAlarm())"
+                                                              Appearance="Appearance.Outline" Color="darkred">
+                                                    Sign out
+                                                </FluentButton>
+                                            </div>
+                                        }
+                                        @if (attendance.TimeOut != null)
+                                        {
+                                            <div>
+                                                <FluentButton Id="@attendance.DisplayTimeOutId" Color="green"
+                                                              Style="font-weight:bold;"
+                                                              IconEnd="@(new Icons.Regular.Size16.CalendarCheckmark())"
+                                                              Appearance="Appearance.Stealth">
+                                                    <FluentBadge Appearance="Appearance.Accent">
+                                                        @attendance.DisplayTimeOut
+                                                    </FluentBadge>
+                                                </FluentButton>
+                                                <FluentTooltip Anchor="@attendance.DisplayTimeOutId"
+                                                               HideTooltipOnCursorLeave="true"
+                                                               Position=TooltipPosition.Top
+                                                               Delay=200>Time Out
+                                                </FluentTooltip>
+                                            </div>
+                                        }
+                                        @*<div>
                                     <FluentButton IconEnd="@(new Icons.Regular.Size16.CalendarCheckmark())"
                                                   Appearance="Appearance.Outline">
                                         @attendance.DisplayTotalHours
                                     </FluentButton>
                                 </div>*@
-                                    <div>
-                                        <FluentStack HorizontalGap="1" Style="padding:3px;"
-                                                     Orientation="Orientation.Horizontal"
-                                                     VerticalAlignment="VerticalAlignment.Center">
-                                            <FluentBadge Circular=true Appearance="Appearance.Neutral">
-                                                <img alt="" width="30" class="h-10 max-w-full"
-                                                     src="/assets/media/images/gamer-coin.svg">
-                                                <FluentLabel Typo="Typography.H4" Style="color:darkgoldenrod;">5
-                                                </FluentLabel>
-                                            </FluentBadge>
-                                        </FluentStack>
-                                    </div>
-                                </FluentStack>
-                            }
-                        </FluentCard>
-                    </FluentGridItem>
+                                        <div>
+                                            <FluentStack HorizontalGap="1" Style="padding:3px;"
+                                                         Orientation="Orientation.Horizontal"
+                                                         VerticalAlignment="VerticalAlignment.Center">
+                                                <FluentBadge Circular=true Appearance="Appearance.Neutral">
+                                                    <img alt="" width="30" class="h-10 max-w-full"
+                                                         src="/assets/media/images/gamer-coin.svg">
+                                                    <FluentLabel Typo="Typography.H4" Style="color:darkgoldenrod;">5
+                                                    </FluentLabel>
+                                                </FluentBadge>
+                                            </FluentStack>
+                                        </div>
+                                    </FluentStack>
+                                }
+                            </FluentCard>
+                        </FluentGridItem>
+                    }
                 }
             </FluentGrid>
         </Content>
@@ -232,8 +257,9 @@
                                     }
                                     @if (quest is { CompletionStatus: true, CompletionDate: null })
                                     {
-                                        <FluentStack Orientation="Orientation.Horizontal" HorizontalGap="5" 
-                                                     HorizontalAlignment="HorizontalAlignment.Center" Style="padding:10px;">
+                                        <FluentStack Orientation="Orientation.Horizontal" HorizontalGap="5"
+                                                     HorizontalAlignment="HorizontalAlignment.Center"
+                                                     Style="padding:10px;">
                                             <FluentButton IconEnd="@(new Icons.Filled.Size16.CheckmarkCircle())"
                                                           Appearance="Appearance.Accent">
                                                 Complete Quest
@@ -263,7 +289,7 @@
                     <FluentAccordion ExpandMode="AccordionExpandMode.Multi">
                         @foreach (var quest in DailySideQuests)
                         {
-                             <FluentAccordionItem HeadingLevel="1" Heading="@quest.QuestName">
+                            <FluentAccordionItem HeadingLevel="1" Heading="@quest.QuestName">
                                 <div slot="end">
                                     <FluentStack HorizontalGap="3" Style="padding:3px;"
                                                  Orientation="Orientation.Horizontal"
@@ -300,8 +326,9 @@
                                     }
                                     @if (quest is { CompletionStatus: true, CompletionDate: null })
                                     {
-                                        <FluentStack Orientation="Orientation.Horizontal" HorizontalGap="5" 
-                                                     HorizontalAlignment="HorizontalAlignment.Center" Style="padding:10px;">
+                                        <FluentStack Orientation="Orientation.Horizontal" HorizontalGap="5"
+                                                     HorizontalAlignment="HorizontalAlignment.Center"
+                                                     Style="padding:10px;">
                                             <FluentButton IconEnd="@(new Icons.Filled.Size16.CheckmarkCircle())"
                                                           Appearance="Appearance.Accent">
                                                 Complete Quest
@@ -361,9 +388,9 @@
 
     private List<AttendanceTableResponse> AttendanceResponses { get; set; } = [];
 
-    private List<DailyQuestTableResponse> DailyQuestResponses { get; set; } = [];
-    private List<DailyQuestTableResponse> DailyMainQuests { get; set; } = [];
-    private List<DailyQuestTableResponse> DailySideQuests { get; set; } = [];
+    private List<QuestTableResponse> DailyQuestResponses { get; set; } = [];
+    private List<QuestTableResponse> DailyMainQuests { get; set; } = [];
+    private List<QuestTableResponse> DailySideQuests { get; set; } = [];
 
     User? _user = new();
 
@@ -379,7 +406,21 @@
 
         return base.OnInitializedAsync();
     }
-
+    
+    // initialize the weekly attendance
+    private async Task InitializeWeeklyAttendance()
+    {
+        //generate the weekly attendance
+        var isGenerated = await Sender.Send(new GenerateWeeklyAttendanceByUser.Command { userid = Content.Id });
+        
+        if (isGenerated)
+        {
+            //refresh the attendance
+            AttendanceResponses = await Sender.Send(new GetAttendanceByUser.Query { userid = Content.Id });
+        }
+        
+    }
+    
     private async Task LoadDailyQuests()
     {
         //get daily quests
@@ -416,6 +457,7 @@
 
         StateHasChanged();
     }
+
     // sign out
     private async Task SignOutAsync(int attendanceId)
     {
@@ -457,4 +499,5 @@
     {
         _activeTabId = obj.Id;
     }
+
 }

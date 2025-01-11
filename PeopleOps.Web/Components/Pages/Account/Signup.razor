@@ -47,8 +47,8 @@
 @code {
     private readonly RegisterModel _registerModel = new();
 
-    [Inject] AuthService AuthService { get; set; } = default!;
-    [Inject] NavigationManager NavigationManager { get; set; } = default!;
+    [Inject] AuthService AuthService { get; set; } = null!;
+    [Inject] NavigationManager NavigationManager { get; set; } = null!;
     string? _error;
     bool? _canceled;
 

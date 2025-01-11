@@ -9,28 +9,28 @@ namespace PeopleOps.Web.Features.Quest;
 public static class GetDailyQuestsByUser
 {
     //query to get daily quests
-    public class Query : IRequest<List<DailyQuestTableResponse>>
+    public class Query : IRequest<List<QuestTableResponse>>
     {
         public Guid userid { get; set; }
         public string questgroup { get; set; }
-        public DateTime quest_date { get; set; }
+        public DateOnly quest_date { get; set; }
     }
 
     // handler to get daily quests
-    internal sealed class Handler(Client supabaseClient) : IRequestHandler<Query, List<DailyQuestTableResponse>>
+    internal sealed class Handler(Client supabaseClient) : IRequestHandler<Query, List<QuestTableResponse>>
     {
-        public async Task<List<DailyQuestTableResponse>> Handle(Query request, CancellationToken cancellationToken)
+        public async Task<List<QuestTableResponse>> Handle(Query request, CancellationToken cancellationToken)
         {
-            List<DailyQuestTableResponse> dailyQuests = [];
+            List<QuestTableResponse> dailyQuests = [];
             //get all daily quests for the day
-            request.quest_date = DateTimeOffset.Now.Date;
+            request.quest_date = DateOnly.FromDateTime(DateTime.Now);
             var baseResponse = await supabaseClient.Rpc("get_daily_user_quests",
                     new { request.quest_date,request.questgroup,request.userid})
                 .ConfigureAwait(false);
             //convert the response to a list of daily quests quest_date, questgroup, userid
             if (baseResponse.ResponseMessage is { IsSuccessStatusCode: true })
             {
-                dailyQuests = JsonSerializer.Deserialize<List<DailyQuestTableResponse>>(baseResponse.Content,
+                dailyQuests = JsonSerializer.Deserialize<List<QuestTableResponse>>(baseResponse.Content,
                     new JsonSerializerOptions
                     {
                         PropertyNameCaseInsensitive = true,
