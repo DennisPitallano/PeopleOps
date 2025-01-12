@@ -10,13 +10,227 @@
 @inject IDialogService DialogService
 @rendermode InteractiveServer
 @inject Client supabase
-@*<FluentMessageBarProvider Section="@App.MESSAGES_DIALOG" MaxMessageCount="1" />
 
-<p>Your lastname is @Content.Lastname and you are @Content.Age years young </p>*@
+@code {
+    /*[Parameter]
+    public SimplePerson Content { get; set; } = default!;*/
 
-@*<FluentTextField @bind-Value="@Content.Firstname">Your firstname:</FluentTextField>
-<FluentTextField @bind-Value="@Content.Lastname">Your lastname:</FluentTextField>
-<FluentNumberField @bind-Value="@Content.Age">Your age:</FluentNumberField>*@
+    [CascadingParameter] public FluentDialog? Dialog { get; set; }
+
+    private void ToggleDialogPrimaryActionButton(bool enable)
+    {
+        Dialog!.TogglePrimaryActionButton(enable);
+    }
+
+    [Parameter] public required ProfileResponse Content { get; set; }
+
+    private List<AttendanceTableResponse> AttendanceResponses { get; set; } = [];
+
+    private List<QuestTableResponse> DailyQuestResponses { get; set; } = [];
+    private List<QuestTableResponse> DailyMainQuests { get; set; } = [];
+    private List<QuestTableResponse> DailySideQuests { get; set; } = [];
+
+    private List<QuestTableResponse> WeeklyQuestResponses { get; set; } = [];
+    private List<QuestTableResponse> WeeklyMainQuests { get; set; } = [];
+    private List<QuestTableResponse> WeeklySideQuests { get; set; } = [];
+
+    private List<QuestTableResponse> MonthlyQuestResponses { get; set; } = [];
+    private List<QuestTableResponse> MonthlyMainQuests { get; set; } = [];
+    private List<QuestTableResponse> MonthlySideQuests { get; set; } = [];
+
+    User? _user = new();
+
+    string? _activeTabId = "tab-attendance";
+    bool _isLoading;
+    protected override async Task<Task> OnInitializedAsync()
+    {
+        _user = supabase.Auth.CurrentUser;
+        //get the attendance of the user
+        AttendanceResponses = await Sender.Send(new GetAttendanceByUser.Query { userid = Content.Id });
+
+        await LoadDailyQuests();
+        // load weekly quests
+        await LoadWeeklyQuests();
+
+        return base.OnInitializedAsync();
+    }
+
+    // initialize the weekly attendance
+    private async Task InitializeWeeklyAttendance()
+    {
+        //generate the weekly attendance
+        var isGenerated = await Sender.Send(new GenerateWeeklyAttendanceByUser.Command { userid = Content.Id });
+
+        if (isGenerated)
+        {
+            //refresh the attendance
+            AttendanceResponses = await Sender.Send(new GetAttendanceByUser.Query { userid = Content.Id });
+        }
+
+    }
+
+    private async Task LoadDailyQuests()
+    {
+        //get daily quests
+        DailyQuestResponses = await Sender.Send(new GetDailyQuestsByUser.Query { userid = Content.Id, questgroup = "daily" });
+
+        //main quests
+        DailyMainQuests = DailyQuestResponses.Where(x => x.IsMainQuest).ToList();
+        //side quests
+        DailySideQuests = DailyQuestResponses.Where(x => !x.IsMainQuest).ToList();
+    }
+
+    private async Task LoadWeeklyQuests()
+    {
+        //get weekly quests
+        WeeklyQuestResponses = await Sender.Send(new GetWeeklyQuestsByUser.Query { userid = Content.Id, questgroup = "weekly" });
+
+        //main quests
+        WeeklyMainQuests = WeeklyQuestResponses.Where(x => x.IsMainQuest).ToList();
+        //side quests
+        WeeklySideQuests = WeeklyQuestResponses.Where(x => !x.IsMainQuest).ToList();
+    }
+
+    private async Task LoadMonthlyQuests()
+    {
+        //get monthly quests
+        MonthlyQuestResponses = await Sender.Send(new GetMonthlyQuestsByUser.Query { userid = Content.Id, questgroup = "monthly" });
+
+        //main quests
+        MonthlyMainQuests = MonthlyQuestResponses.Where(x => x.IsMainQuest).ToList();
+        //side quests
+        MonthlySideQuests = MonthlyQuestResponses.Where(x => !x.IsMainQuest).ToList();
+    }
+
+
+    // initialize the daily quests
+    private async Task InitializeDailyQuests()
+    {
+        //get daily quests
+        var isGenerated = await Sender.Send(new GenerateDailyQuest.Command { userid = Content.Id });
+
+        if (isGenerated)
+        {
+            await LoadDailyQuests();
+        }
+
+        StateHasChanged();
+    }
+    
+    // initialize the weekly quests
+    private async Task InitializeWeeklyQuests()
+    {
+        //get weekly quests
+        var isGenerated = await Sender.Send(new GenerateWeeklyQuest.Command { userid = Content.Id });
+
+        if (isGenerated)
+        {
+            await LoadWeeklyQuests();
+        }
+
+        StateHasChanged();
+    }
+
+    // set quest as in progress
+    private async Task SetQuestAsInProgress(long questId, bool status)
+    {
+        _isLoading = true;
+        var isSuccess = await Sender.Send(new SetQuestAsInProgress.Command { Id = questId, Status = status });
+        if (isSuccess)
+        {
+            await LoadDailyQuests();
+        }
+        _isLoading = false;
+        StateHasChanged();
+    }
+
+    private async Task SetQuestAsInProgress(QuestTableResponse quest)
+    {
+        _isLoading = true;
+        var isSuccess = await Sender.Send(new SetQuestAsInProgress.Command { Id = quest.Id, Status = true });
+        if (isSuccess)
+        {
+           await ReloadQuests(quest.QuestGroup);
+        }
+        _isLoading = false;
+        StateHasChanged();
+    }
+
+    private async Task CancelQuest(QuestTableResponse quest)
+    {
+        _isLoading = true;
+        var isSuccess = await Sender.Send(new SetQuestAsInProgress.Command { Id = quest.Id, Status = false });
+        if (isSuccess)
+        {
+            await ReloadQuests(quest.QuestGroup);
+        }
+        _isLoading = false;
+        StateHasChanged();
+    }
+    
+    private async Task ReloadQuests(string questGroup)
+    {
+        switch (questGroup)
+        {
+            case "weekly":
+            case "special-weekly":
+                await LoadWeeklyQuests();
+                break;
+            case "monthly":
+            case "special-monthly":
+                await LoadMonthlyQuests();
+                break;
+            case "daily":
+            case "special-daily":
+                await LoadDailyQuests();
+                break;
+        }
+    }
+    
+    // sign out
+    private async Task SignOutAsync(int attendanceId)
+    {
+        await Sender.Send(new SignOutAttendance.Command { Id = attendanceId });
+        //refresh the attendance
+        AttendanceResponses = await Sender.Send(new GetAttendanceByUser.Query { userid = Content.Id });
+
+        StateHasChanged();
+    }
+
+    // sign in
+    private async Task SigninAsync(int attendanceId)
+    {
+        await Sender.Send(new SignInAttendance.Command { Id = attendanceId });
+        //refresh the attendance
+        AttendanceResponses = await Sender.Send(new GetAttendanceByUser.Query { userid = Content.Id });
+
+        //show message box that the user has signed in successfully with conffeti emoji
+        var dialog = await DialogService.ShowMessageBoxAsync(new DialogParameters<MessageBoxContent>()
+        {
+            Content = new MessageBoxContent
+            {
+                MarkupMessage = new MarkupString("<span style='font-size:7rem;'>\ud83c\udf89</span>"),
+                // MarkupMessage = new MarkupString("<img src='assets/media/images/congratulations.gif' style='font-size:10rem; width:150px; height:50;' />"),
+                IconColor = Color.Success,
+            },
+            PrimaryAction = "",
+            SecondaryAction = "Hooray!🥳",
+            Width = "170px",
+            Height = "170px",
+            TrapFocus = false,
+            PreventDismissOnOverlayClick = false,
+            Alignment = HorizontalAlignment.Start,
+        });
+        StateHasChanged();
+    }
+
+    private void OnTabChange(FluentTab obj)
+    {
+        _activeTabId = obj.Id;
+    }
+
+}
+
 <FluentDialogHeader Visible="false"/>
 <FluentTabs ActiveTabId="@_activeTabId" OnTabChange="OnTabChange" Size="TabSize.Large" Style="text-align:center">
     <FluentTab Id="tab-attendance" Style="padding-top:1rem;">
@@ -357,7 +571,14 @@
             </span>
         </Header>
         <Content>
-            Content 2
+            <FluentGrid Spacing="2" Justify="JustifyContent.SpaceAround">
+                <Quests MainQuests="WeeklyMainQuests"
+                             SideQuests="WeeklySideQuests"
+                             InitializeQuests="InitializeWeeklyQuests"
+                             SetQuestAsInProgress="SetQuestAsInProgress"
+                             CancelQuest="CancelQuest"
+                             IsLoading="_isLoading"/>
+            </FluentGrid>
         </Content>
     </FluentTab>
     <FluentTab Id="tab-monthly">
@@ -373,131 +594,3 @@
     </FluentTab>
 </FluentTabs>
 
-@code {
-    /*[Parameter]
-    public SimplePerson Content { get; set; } = default!;*/
-
-    [CascadingParameter] public FluentDialog? Dialog { get; set; }
-
-    private void ToggleDialogPrimaryActionButton(bool enable)
-    {
-        Dialog!.TogglePrimaryActionButton(enable);
-    }
-
-    [Parameter] public required ProfileResponse Content { get; set; }
-
-    private List<AttendanceTableResponse> AttendanceResponses { get; set; } = [];
-
-    private List<QuestTableResponse> DailyQuestResponses { get; set; } = [];
-    private List<QuestTableResponse> DailyMainQuests { get; set; } = [];
-    private List<QuestTableResponse> DailySideQuests { get; set; } = [];
-
-    User? _user = new();
-
-    string? _activeTabId = "tab-attendance";
-
-    protected override async Task<Task> OnInitializedAsync()
-    {
-        _user = supabase.Auth.CurrentUser;
-        //get the attendance of the user
-        AttendanceResponses = await Sender.Send(new GetAttendanceByUser.Query { userid = Content.Id });
-
-        await LoadDailyQuests();
-
-        return base.OnInitializedAsync();
-    }
-    
-    // initialize the weekly attendance
-    private async Task InitializeWeeklyAttendance()
-    {
-        //generate the weekly attendance
-        var isGenerated = await Sender.Send(new GenerateWeeklyAttendanceByUser.Command { userid = Content.Id });
-        
-        if (isGenerated)
-        {
-            //refresh the attendance
-            AttendanceResponses = await Sender.Send(new GetAttendanceByUser.Query { userid = Content.Id });
-        }
-        
-    }
-    
-    private async Task LoadDailyQuests()
-    {
-        //get daily quests
-        DailyQuestResponses = await Sender.Send(new GetDailyQuestsByUser.Query { userid = Content.Id, questgroup = "daily" });
-
-        //main quests
-        DailyMainQuests = DailyQuestResponses.Where(x => x.IsMainQuest).ToList();
-        //side quests
-        DailySideQuests = DailyQuestResponses.Where(x => !x.IsMainQuest).ToList();
-    }
-
-    // initialize the daily quests
-    private async Task InitializeDailyQuests()
-    {
-        //get daily quests
-        var isGenerated = await Sender.Send(new GenerateDailyQuest.Command { userid = Content.Id });
-
-        if (isGenerated)
-        {
-            await LoadDailyQuests();
-        }
-
-        StateHasChanged();
-    }
-
-    // set quest as in progress
-    private async Task SetQuestAsInProgress(long questId, bool status)
-    {
-        var isSuccess = await Sender.Send(new SetQuestAsInProgress.Command { Id = questId, Status = status });
-        if (isSuccess)
-        {
-            await LoadDailyQuests();
-        }
-
-        StateHasChanged();
-    }
-
-    // sign out
-    private async Task SignOutAsync(int attendanceId)
-    {
-        await Sender.Send(new SignOutAttendance.Command { Id = attendanceId });
-        //refresh the attendance
-        AttendanceResponses = await Sender.Send(new GetAttendanceByUser.Query { userid = Content.Id });
-
-        StateHasChanged();
-    }
-
-    // sign in
-    private async Task SigninAsync(int attendanceId)
-    {
-        await Sender.Send(new SignInAttendance.Command { Id = attendanceId });
-        //refresh the attendance
-        AttendanceResponses = await Sender.Send(new GetAttendanceByUser.Query { userid = Content.Id });
-
-        //show message box that the user has signed in successfully with conffeti emoji
-        var dialog = await DialogService.ShowMessageBoxAsync(new DialogParameters<MessageBoxContent>()
-        {
-            Content = new MessageBoxContent
-            {
-                MarkupMessage = new MarkupString("<span style='font-size:7rem;'>\ud83c\udf89</span>"),
-                // MarkupMessage = new MarkupString("<img src='assets/media/images/congratulations.gif' style='font-size:10rem; width:150px; height:50;' />"),
-                IconColor = Color.Success,
-            },
-            PrimaryAction = "",
-            SecondaryAction = "Hooray!🥳",
-            Width = "170px",
-            Height = "170px",
-            TrapFocus = false,
-            PreventDismissOnOverlayClick = false,
-            Alignment = HorizontalAlignment.Start,
-        });
-        StateHasChanged();
-    }
-
-    private void OnTabChange(FluentTab obj)
-    {
-        _activeTabId = obj.Id;
-    }
-
-}

@@ -16,8 +16,9 @@ public static class GenerateWeeklyQuest
     {
         public async Task<bool> Handle(Command request, CancellationToken cancellationToken)
         {
-            var baseResponse = await supabaseClient.Rpc("generate_week_quest",
-                new {request.userid, quest_date = DateOnly.FromDateTime(DateTime.Now)})
+            var quest_date = DateOnly.FromDateTime(DateTime.Now);
+            var baseResponse = await supabaseClient.Rpc("generate_weekly_quest",
+                new {quest_date,request.userid})
                 .ConfigureAwait(false);
             return baseResponse.ResponseMessage!.IsSuccessStatusCode;
         }
