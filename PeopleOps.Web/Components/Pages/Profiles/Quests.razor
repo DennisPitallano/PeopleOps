@@ -42,7 +42,7 @@ else
     <FluentAccordion ExpandMode="AccordionExpandMode.Multi">
         @foreach (var quest in MainQuests)
         {
-            <FluentAccordionItem HeadingLevel="1" Heading="@quest.QuestName">
+            <FluentAccordionItem Style="" HeadingLevel="1" Heading="@quest.QuestName">
                 <div slot="end">
                     <FluentStack HorizontalGap="3" Style="padding:3px;"
                                  Orientation="Orientation.Horizontal"
@@ -54,10 +54,16 @@ else
                                 @quest.QuestPoints
                             </FluentLabel>
                         </FluentBadge>
-                        @if (quest.CompletionStatus)
+                        @if(quest is { CompletionStatus: true, CompletionDate: null })
                         {
                             <FluentBadge Circular=true Appearance="Appearance.Accent">
-                                In Progress
+                                In Progress 🧪
+                            </FluentBadge>
+                        }
+                        @if(quest is { CompletionStatus: true, CompletionDate: not null })
+                        {
+                            <FluentBadge Circular=true Appearance="Appearance.Lightweight">
+                                <span style="color:#0c9033; font-weight:500;">Completed 🎉</span>
                             </FluentBadge>
                         }
                     </FluentStack>
@@ -82,7 +88,8 @@ else
                                      HorizontalAlignment="HorizontalAlignment.Center"
                                      Style="padding:10px;">
                             <FluentButton IconEnd="@(new Icons.Filled.Size16.CheckmarkCircle())"
-                                          Appearance="Appearance.Accent" Loading="IsLoading">
+                                          Appearance="Appearance.Accent" Loading="IsLoading"
+                                          OnClick="() => CompleteQuest.InvokeAsync(quest)">
                                 Complete Quest
                             </FluentButton>
 
@@ -123,10 +130,16 @@ else
                                 @quest.QuestPoints
                             </FluentLabel>
                         </FluentBadge>
-                        @if (quest.CompletionStatus)
+                        @if(quest is { CompletionStatus: true, CompletionDate: null })
                         {
                             <FluentBadge Circular=true Appearance="Appearance.Accent">
-                                In Progress
+                                In Progress 🧪
+                            </FluentBadge>
+                        }
+                        @if(quest is { CompletionStatus: true, CompletionDate: not null })
+                        {
+                            <FluentBadge Circular=true Appearance="Appearance.Lightweight">
+                             <span style="color:#0c9033; font-weight:500;">Completed 🎉</span>
                             </FluentBadge>
                         }
                     </FluentStack>
@@ -141,7 +154,7 @@ else
                     {
                         <FluentButton OnClick="() => SetQuestAsInProgress.InvokeAsync(quest)"
                                       IconEnd="@(new Icons.Filled.Size16.ArrowCircleRight())"
-                                      Appearance="Appearance.Accent">
+                                      Appearance="Appearance.Accent" Loading="IsLoading">
                             Start Quest
                         </FluentButton>
                     }
@@ -151,12 +164,14 @@ else
                                      HorizontalAlignment="HorizontalAlignment.Center"
                                      Style="padding:10px;">
                             <FluentButton IconEnd="@(new Icons.Filled.Size16.CheckmarkCircle())"
-                                          Appearance="Appearance.Accent">
+                                          Appearance="Appearance.Accent" Loading="IsLoading"
+                                          OnClick="() => CompleteQuest.InvokeAsync(quest)">
                                 Complete Quest
                             </FluentButton>
 
                             <FluentButton IconEnd="@(new Icons.Filled.Size16.ArrowRedo())"
                                           OnClick="() => CancelQuest.InvokeAsync(quest)"
+                                          Loading="IsLoading"
                                           Appearance="Appearance.Outline" Color="darkred">
                                 Cancel Quest
                             </FluentButton>

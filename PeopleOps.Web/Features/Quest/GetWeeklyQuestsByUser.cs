@@ -15,8 +15,6 @@ public static class GetWeeklyQuestsByUser
     {
         public Guid userid { get; set; }
         public string questgroup { get; set; }
-        public DateOnly start_date { get; set; }
-        public DateOnly end_date { get; set; }
     }
 
     // handler to get weekly quests
@@ -27,13 +25,13 @@ public static class GetWeeklyQuestsByUser
             List<QuestTableResponse> weeklyQuests = [];
             //get all weekly quests for the day
             // set the start and end date for the week to get the weekly quests
-            request.start_date = DateOnly.FromDateTime(DateTime.Now.StartOfWeek(DayOfWeek.Monday));
-            request.end_date = DateOnly.FromDateTime(DateTime.Now.EndOfWeek(DayOfWeek.Friday));
-            
+            var start_date = DateOnly.FromDateTime(DateTime.Now.StartOfWeek(DayOfWeek.Monday));
+            var end_date = DateOnly.FromDateTime(DateTime.Now.EndOfWeek(DayOfWeek.Friday));
+
             // call the get_weekly_quests rpc
-            
+
             var baseResponse = await supabaseClient.Rpc("get_weekly_quests",
-                    new { request.end_date,request.start_date,request.userid})
+                    new { end_date, start_date, request.userid })
                 .ConfigureAwait(false);
             //convert the response to a list of weekly quests quest_date, questgroup, userid
             if (baseResponse.ResponseMessage is { IsSuccessStatusCode: true })
@@ -49,5 +47,4 @@ public static class GetWeeklyQuestsByUser
             return weeklyQuests;
         }
     }
-    
 }

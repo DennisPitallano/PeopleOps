@@ -8,7 +8,7 @@ public static class GenerateMonthlyQuest
     //query to generate monthly quest
     public class Command : IRequest<bool>
     {
-        public Guid userid { get; set; }
+        public Guid UserId { get; set; }
     }
 
     // handler to generate monthly quest
@@ -17,7 +17,7 @@ public static class GenerateMonthlyQuest
         public async Task<bool> Handle(Command request, CancellationToken cancellationToken)
         {
             var baseResponse = await supabaseClient.Rpc("generate_monthly_quest",
-                new {request.userid, quest_date = DateOnly.FromDateTime(DateTime.Now)})
+                new {quest_date = DateOnly.FromDateTime(DateTime.Now), userid = request.UserId})
                 .ConfigureAwait(false);
             return baseResponse.ResponseMessage!.IsSuccessStatusCode;
         }

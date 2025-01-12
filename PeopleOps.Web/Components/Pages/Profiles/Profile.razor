@@ -3,6 +3,42 @@
 @using PeopleOps.Web.Contracts
 @*@attribute [Authorize]*@
 @rendermode InteractiveServer
+
+@code {
+    bool DeferredLoading = false;
+
+    private bool _trapFocus = true;
+    private bool _modal = true;
+
+    private async Task OpenDialogAsync()
+    {
+        DialogParameters parameters = new()
+        {
+            Title = $"Hello {ProfileResponse.FirstName}",
+            TrapFocus = false,
+            Modal = _modal,
+            PreventScroll = true,
+            PreventDismissOnOverlayClick = true,
+            ShowTitle = false,
+            ShowDismiss = false,
+            Alignment = HorizontalAlignment.Center,
+            PrimaryAction = "",
+            SecondaryAction = "Close",
+        };
+
+        IDialogReference dialog = await DialogService.ShowDialogAsync<TaskCenterModal>(ProfileResponse, parameters);
+        DialogResult? result = await dialog.Result;
+
+        if (result.Cancelled && result.Data != null)
+        {
+            TotalLedgerPointsBalance = await GetTotalPoints();
+            TotalCompletedQuests = await GetTotalCompletedQuests();
+            await LoadCompletedQuests();
+        }
+    }
+
+}
+
 <PageTitle>Profile</PageTitle>
 
 <FluentStack Orientation="Orientation.Vertical" VerticalAlignment="VerticalAlignment.Center"
@@ -35,17 +71,19 @@
         </div>
         <FluentStack Orientation="Orientation.Horizontal" VerticalAlignment="VerticalAlignment.Center"
                      HorizontalAlignment="HorizontalAlignment.Center">
-            <FluentLabel Color="Color.Custom" CustomColor="grey" Weight="FontWeight.Bold" >
-                <FluentIcon Color="Color.Accent" Value="@(new Icons.Filled.Size12.Location())" /> <span> PH, @ProfileResponse?.CityAddress </span>
+            <FluentLabel Color="Color.Custom" CustomColor="grey" Weight="FontWeight.Bold">
+                <FluentIcon Color="Color.Accent" Value="@(new Icons.Filled.Size12.Location())"/>
+                <span> PH, @ProfileResponse?.CityAddress </span>
             </FluentLabel>
-            <FluentLabel Color="Color.Custom" CustomColor="grey" Weight="FontWeight.Bold" >
-                <FluentIcon Value="@(new Icons.Filled.Size12.PersonCircle())" /> <span> @ProfileResponse?.JobTitle </span>
+            <FluentLabel Color="Color.Custom" CustomColor="grey" Weight="FontWeight.Bold">
+                <FluentIcon Value="@(new Icons.Filled.Size12.PersonCircle())"/>
+                <span> @ProfileResponse?.JobTitle </span>
             </FluentLabel>
         </FluentStack>
     </FluentStack>
 </FluentStack>
 
-<FluentGrid Spacing="1"  Justify="JustifyContent.Center" Style=" padding: 4px;">
+<FluentGrid Spacing="1" Justify="JustifyContent.Center" Style=" padding: 4px;">
     <FluentGridItem xxl="8" xl="8" lg="8" xs="12">
         <div class="card">
             <FluentTabs Size="TabSize.Large">
@@ -53,7 +91,7 @@
                     <FluentCounterBadge Count="10" BackgroundColor="@Color.Error" Color="Color.Fill">
                         <ChildContent>
                             <FluentButton @onclick="@OpenDialogAsync" Style="font-weight:500; font-size:small;">
-                               Quest Center
+                                Quest Center
                             </FluentButton>
                         </ChildContent>
                         <BadgeTemplate>New📃!</BadgeTemplate>
@@ -66,46 +104,63 @@
                                      VerticalAlignment="VerticalAlignment.Center"
                                      HorizontalGap="15" VerticalGap="2"
                                      Style="">
-                            <FluentGrid Spacing="2" Justify="JustifyContent.SpaceEvenly" Style="padding-left: 10px; padding-right: 10px;">
+                            <FluentGrid Spacing="2" Justify="JustifyContent.SpaceEvenly"
+                                        Style="padding-left: 10px; padding-right: 10px;">
                                 <FluentGridItem xs="3" Justify="JustifyContent.Center">
-                                    <img alt="" width="40" class="h-10 max-w-full" src="/assets/media/images/gamer-coin.svg">
+                                    <img alt="" width="40" class="h-10 max-w-full"
+                                         src="/assets/media/images/gamer-coin.svg">
                                 </FluentGridItem>
                                 <FluentGridItem xs="9">
                                     <FluentLabel Typo="Typography.H2">100</FluentLabel>
-                                    <FluentLabel Color="Color.Custom" CustomColor="grey" Style="font-weight:500;">Available Coins</FluentLabel>
+                                    <FluentLabel Color="Color.Custom" CustomColor="grey" Style="font-weight:500;">
+                                        Available Coins
+                                    </FluentLabel>
                                 </FluentGridItem>
                             </FluentGrid>
                             <FluentSpacer/>
-                            <FluentDivider Style="height: 50px;" Role="DividerRole.Presentation" Orientation="Orientation.Vertical"></FluentDivider>
-                            <FluentGrid Spacing="2" Justify="JustifyContent.SpaceEvenly" Style="padding-left: 10px; padding-right: 10px;">
+                            <FluentDivider Style="height: 50px;" Role="DividerRole.Presentation"
+                                           Orientation="Orientation.Vertical"></FluentDivider>
+                            <FluentGrid Spacing="2" Justify="JustifyContent.SpaceEvenly"
+                                        Style="padding-left: 10px; padding-right: 10px;">
                                 <FluentGridItem xs="3" Justify="JustifyContent.Center">
-                                    <img alt="" width="40" class="h-10 max-w-full" src="/assets/media/images/gamer-coin.svg">
+                                    <img alt="" width="40" class="h-10 max-w-full"
+                                         src="/assets/media/images/gamer-coin.svg">
                                 </FluentGridItem>
                                 <FluentGridItem xs="9">
-                                    <FluentLabel Typo="Typography.H2">345</FluentLabel>
-                                    <FluentLabel Color="Color.Custom" CustomColor="grey" Style="font-weight:500;">Coins earned</FluentLabel>
+                                    <FluentLabel Typo="Typography.H2">@TotalLedgerPointsBalance</FluentLabel>
+                                    <FluentLabel Color="Color.Custom" CustomColor="grey" Style="font-weight:500;">Coins
+                                        earned
+                                    </FluentLabel>
                                 </FluentGridItem>
                             </FluentGrid>
                             <FluentSpacer/>
-                            <FluentDivider Style="height: 50px;" Role="DividerRole.Presentation" Orientation="Orientation.Vertical"></FluentDivider>
+                            <FluentDivider Style="height: 50px;" Role="DividerRole.Presentation"
+                                           Orientation="Orientation.Vertical"></FluentDivider>
                             <FluentGrid Spacing="2" Style="padding-left: 10px; padding-right: 10px;">
                                 <FluentGridItem xs="3" Justify="JustifyContent.Center">
-                                    <img alt="" width="40" class="h-10 max-w-full" src="/assets/media/images/gamer-diamond.svg">
+                                    <img alt="" width="40" class="h-10 max-w-full"
+                                         src="/assets/media/images/gamer-diamond.svg">
                                 </FluentGridItem>
                                 <FluentGridItem xs="9">
-                                    <FluentLabel Typo="Typography.H2">125</FluentLabel>
-                                    <FluentLabel Color="Color.Custom" CustomColor="grey" Style="font-weight:500;">Quests Completed</FluentLabel>
+                                    <FluentLabel Typo="Typography.H2">@TotalCompletedQuests</FluentLabel>
+                                    <FluentLabel Color="Color.Custom" CustomColor="grey" Style="font-weight:500;">Quests
+                                        Completed
+                                    </FluentLabel>
                                 </FluentGridItem>
                             </FluentGrid>
                             <FluentSpacer/>
-                            <FluentDivider Style="height: 50px;" Role="DividerRole.Presentation" Orientation="Orientation.Vertical"></FluentDivider>
+                            <FluentDivider Style="height: 50px;" Role="DividerRole.Presentation"
+                                           Orientation="Orientation.Vertical"></FluentDivider>
                             <FluentGrid Spacing="2" Style="padding-left: 10px; padding-right: 10px;">
                                 <FluentGridItem xs="6" Justify="JustifyContent.Center">
-                                    <img alt="" width="40" class="h-10 max-w-full" src="/assets/media/images/gamer-trophy.svg">
+                                    <img alt="" width="40" class="h-10 max-w-full"
+                                         src="/assets/media/images/gamer-trophy.svg">
                                 </FluentGridItem>
                                 <FluentGridItem xs="6">
                                     <FluentLabel Typo="Typography.H2">19</FluentLabel>
-                                    <FluentLabel Color="Color.Custom" CustomColor="grey" Style="font-weight:500;">Trophies</FluentLabel>
+                                    <FluentLabel Color="Color.Custom" CustomColor="grey" Style="font-weight:500;">
+                                        Trophies
+                                    </FluentLabel>
                                 </FluentGridItem>
                             </FluentGrid>
                         </FluentStack>
@@ -113,24 +168,104 @@
 
                     <FluentGrid Spacing="3" Style="margin-top:2rem;" Justify="JustifyContent.FlexStart">
                         <FluentGridItem xs="12" sm="4" HiddenWhen="GridItemHidden.SmAndDown">
-                            <FluentCard MinimalStyle="true" Style="padding:0.5rem;">
-                                <h4 style="padding-left: 1rem;">Badges</h4>
-                                <FluentDivider Style="width: 100%;" Role="DividerRole.Presentation"></FluentDivider>
-                                <p>Badges goes here.</p>
-                            </FluentCard>
+                            <FluentStack Orientation="Orientation.Vertical">
+                                <FluentCard Height="300" AreaRestricted="true" MinimalStyle="true"
+                                            Style="padding:0.5rem;">
+                                    <h4 style="padding-left: 1rem;">Badges</h4>
+                                    <FluentDivider Style="width: 100%;" Role="DividerRole.Presentation"></FluentDivider>
+                                    <p>Badges goes here.</p>
+                                </FluentCard>
+                                <FluentCard Style="padding:0.5rem;">
+                                    <h4 style="padding-left: 1rem;">Attendance Activity</h4>
+                                    <FluentDivider Style="width: 100%;" Role="DividerRole.Presentation"></FluentDivider>
+                                    <div style="margin-top: 1rem;">
+                                        @foreach (var attendance in AttendanceActivities)
+                                        {
+                                            <FluentStack Orientation="Orientation.Horizontal"
+                                                         VerticalAlignment="VerticalAlignment.Center"
+                                                         HorizontalAlignment="HorizontalAlignment.Start"
+                                                         HorizontalGap="1"
+                                                         VerticalGap="1">
+                                                <FluentStack Orientation="Orientation.Vertical"
+                                                             VerticalAlignment="VerticalAlignment.Center"
+                                                             HorizontalAlignment="HorizontalAlignment.Start"
+                                                             VerticalGap="1">
+                                                    <FluentCard Width="55px"
+                                                                Style="border:1px solid rgba(255,111,30,.2); padding:0;
+                                                                 text-align:center; margin-bottom:10px;">
+                                                        <div
+                                                            style="background-color:#fff5ef; color:#ff6f1e; padding:2px;">
+                                                            <h6>@attendance.ActivityDate.ToString("MMM")</h6>
+                                                        </div>
+                                                        <FluentDivider Style="border-color:#ff6f1e"
+                                                                       Role="DividerRole.Separator"
+                                                                       Orientation="Orientation.Horizontal"></FluentDivider>
+                                                        <h4>@attendance.ActivityDate.Day</h4>
+                                                    </FluentCard>
+                                                </FluentStack>
+                                                
+                                                <FluentStack Orientation="Orientation.Vertical" VerticalGap="1"
+                                                             HorizontalAlignment="HorizontalAlignment.Start">
+                                                <span>
+                                                    <FluentBadge Appearance="Appearance.Accent" Circular="true">
+                                                        @attendance.DisplayTotalHours
+                                                    </FluentBadge>
+                                                    @attendance.DisplayDate
+                                                </span>
+                                                    <div>
+                                                    <span style="font-size:smaller; color: grey; ">
+                                                        @attendance.DisplayTimeIn - @attendance.DisplayTimeOut
+                                                    </span>
+                                                        <p style="font-size:smaller;">
+                                                            @attendance.Id
+                                                        </p>
+                                                    </div>
+                                                </FluentStack>
+                                            </FluentStack>
+                                        }
+                                    </div>
+                                </FluentCard>
+                            </FluentStack>
+
                         </FluentGridItem>
                         <FluentGridItem xs="12" sm="8">
-
                             <FluentCard MinimalStyle="true" Style="padding:0.5rem;">
                                 <h4 style="padding-left: 1rem;">@ProfileResponse?.FirstName's Quests</h4>
                                 <FluentDivider Style="width: 100%;" Role="DividerRole.Separator"></FluentDivider>
                                 <div style="margin-top: 1rem;">
-                                    
+                                    @foreach (var completedQuest in CompletedQuests)
+                                    {
+                                        <FluentStack Orientation="Orientation.Horizontal"
+                                                     VerticalAlignment="VerticalAlignment.Center"
+                                                     HorizontalAlignment="HorizontalAlignment.Start" HorizontalGap="2"
+                                                     VerticalGap="2">
+                                            <FluentDivider Style="height:68px;border:1px solid #1b6ec2"
+                                                           Role="DividerRole.Separator"
+                                                           Orientation="Orientation.Vertical"></FluentDivider>
+                                            <FluentStack Orientation="Orientation.Vertical" VerticalGap="1"
+                                                         HorizontalAlignment="HorizontalAlignment.Start">
+                                                <span>
+                                                    <FluentBadge Appearance="Appearance.Accent" Circular="true">
+                                                        @completedQuest.QuestGroup
+                                                    </FluentBadge>
+                                                    @completedQuest.QuestName
+                                                </span>
+                                                <div>
+                                                    <span style="font-size:smaller; color: grey; ">
+                                                        @completedQuest.CompletionDateDisplay
+                                                        <FluentBadge Appearance="Appearance.Neutral" Circular="true">
+                                                            🪙@completedQuest.QuestPoints 
+                                                        </FluentBadge>
+                                                    </span>
+                                                    <p style="font-size:smaller;">
+                                                        @completedQuest.QuestDescription
+                                                    </p>
+                                                </div>
+                                            </FluentStack>
+                                        </FluentStack>
+                                    }
                                 </div>
                             </FluentCard>
-                        </FluentGridItem>
-                        <FluentGridItem>
-
                         </FluentGridItem>
                     </FluentGrid>
                 </FluentTab>
@@ -160,47 +295,7 @@
             </FluentTabs>
         </div>
     </FluentGridItem>
-   
+
 </FluentGrid>
 
-@code {
-    bool DeferredLoading = false;
-    
-    record Person(int PersonId, string Name, DateOnly BirthDate);
 
-    IQueryable<Person> people = new[]
-    {
-        new Person(10895, "Jean Martin", new DateOnly(1985, 3, 16)),
-        new Person(10944, "António Langa", new DateOnly(1991, 12, 1)),
-        new Person(11203, "Julie Smith", new DateOnly(1958, 10, 10)),
-        new Person(11205, "Nur Sari", new DateOnly(1922, 4, 27)),
-        new Person(11898, "Jose Hernandez", new DateOnly(2011, 5, 3)),
-        new Person(12130, "Kenji Sato", new DateOnly(2004, 1, 9)),
-    }.AsQueryable();
-    
-    private bool _trapFocus = true;
-    private bool _modal = true;
-
-
-    private async Task OpenDialogAsync()
-    {
-
-        DialogParameters parameters = new()
-        {
-            Title = $"Hello {ProfileResponse.FirstName}",
-            TrapFocus = false,
-            Modal = _modal,
-            PreventScroll = true,
-            PreventDismissOnOverlayClick = true,
-            ShowTitle = false,
-            ShowDismiss = false,
-            Alignment = HorizontalAlignment.Center,
-            PrimaryAction = "",
-            SecondaryAction = "Close",
-        };
-
-        IDialogReference dialog = await DialogService.ShowDialogAsync<TaskCenterModal>(ProfileResponse, parameters);
-        DialogResult? result = await dialog.Result;
-        
-    }
-}

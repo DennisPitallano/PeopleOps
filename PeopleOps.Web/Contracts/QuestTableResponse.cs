@@ -39,4 +39,6 @@ public class QuestTableResponse
     
     [JsonPropertyName("quest_type")]
     public bool IsMainQuest { get; set; }
+
+    public string? CompletionDateDisplay => CompletionDate?.ToString("d MMM, yy");
 }

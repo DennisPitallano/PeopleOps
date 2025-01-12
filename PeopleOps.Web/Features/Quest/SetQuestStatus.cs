@@ -4,7 +4,7 @@ using Supabase;
 
 namespace PeopleOps.Web.Features.Quest;
 
-public static class SetQuestAsInProgress
+public static class SetQuestStatus
 {
     //command to set quest to in progress
     public class Command : IRequest<bool>
