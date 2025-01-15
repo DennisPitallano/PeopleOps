@@ -32,9 +32,12 @@ public partial class Profile : ComponentBase
     private long TotalLedgerPointsBalance { get; set; }
     private int TotalCompletedQuests { get; set; }
     
+    private bool IsLoadingData { get; set; } = false;
+    
     User? User { get; set; }
     protected override async Task OnInitializedAsync()
     {
+        IsLoadingData = true;
         User = Supabase.Auth.CurrentUser;
         var state = await AuthenticationStateProvider.GetAuthenticationStateAsync();
         // send get query profile
@@ -46,6 +49,7 @@ public partial class Profile : ComponentBase
         
         await LoadCompletedQuests();
         await LoadWeeklyAttendance();
+        IsLoadingData = false;
     }
     
     // load completed quests

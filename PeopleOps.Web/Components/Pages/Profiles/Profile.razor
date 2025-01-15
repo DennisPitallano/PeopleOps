@@ -1,7 +1,6 @@
 ﻿@page "/profile"
 @using Microsoft.AspNetCore.Authorization
-@using PeopleOps.Web.Contracts
-@*@attribute [Authorize]*@
+@attribute [Authorize]
 @rendermode InteractiveServer
 
 @code {
@@ -27,10 +26,11 @@
         };
 
         IDialogReference dialog = await DialogService.ShowDialogAsync<TaskCenterModal>(ProfileResponse, parameters);
-        DialogResult? result = await dialog.Result;
+        DialogResult result = await dialog.Result;
 
-        if (result.Cancelled && result.Data != null)
+        if (result is { Cancelled: true, Data: not null })
         {
+            await dialog.CloseAsync();
             TotalLedgerPointsBalance = await GetTotalPoints();
             TotalCompletedQuests = await GetTotalCompletedQuests();
             await LoadCompletedQuests();
@@ -127,7 +127,16 @@
                                          src="/assets/media/images/gamer-coin.svg">
                                 </FluentGridItem>
                                 <FluentGridItem xs="9">
-                                    <FluentLabel Typo="Typography.H2">@TotalLedgerPointsBalance</FluentLabel>
+                                    <FluentLabel Typo="Typography.H2">
+                                        @if (IsLoadingData)
+                                        {
+                                            <FluentProgressRing Width="22px" Stroke="ProgressStroke.Small"/>
+                                        }
+                                        else
+                                        {
+                                            @TotalLedgerPointsBalance
+                                        }
+                                    </FluentLabel>
                                     <FluentLabel Color="Color.Custom" CustomColor="grey" Style="font-weight:500;">Coins
                                         earned
                                     </FluentLabel>
@@ -142,7 +151,16 @@
                                          src="/assets/media/images/gamer-diamond.svg">
                                 </FluentGridItem>
                                 <FluentGridItem xs="9">
-                                    <FluentLabel Typo="Typography.H2">@TotalCompletedQuests</FluentLabel>
+                                    <FluentLabel Typo="Typography.H2">
+                                        @if (IsLoadingData)
+                                        {
+                                            <FluentProgressRing Width="22px" Stroke="ProgressStroke.Small"/>
+                                        }
+                                        else
+                                        {
+                                            @TotalCompletedQuests
+                                        }
+                                    </FluentLabel>
                                     <FluentLabel Color="Color.Custom" CustomColor="grey" Style="font-weight:500;">Quests
                                         Completed
                                     </FluentLabel>
@@ -168,7 +186,8 @@
 
                     <FluentGrid Spacing="3" Style="margin-top:2rem;" Justify="JustifyContent.FlexStart">
                         <FluentGridItem xs="12" sm="4" HiddenWhen="GridItemHidden.SmAndDown">
-                            <FluentStack Orientation="Orientation.Vertical">
+                            <FluentStack Orientation="Orientation.Vertical" VerticalAlignment="VerticalAlignment.Center"
+                                         HorizontalAlignment="HorizontalAlignment.Start">
                                 <FluentCard Height="300" AreaRestricted="true" MinimalStyle="true"
                                             Style="padding:0.5rem;">
                                     <h4 style="padding-left: 1rem;">Badges</h4>
@@ -183,12 +202,12 @@
                                         {
                                             <FluentStack Orientation="Orientation.Horizontal"
                                                          VerticalAlignment="VerticalAlignment.Center"
-                                                         HorizontalAlignment="HorizontalAlignment.Start"
+                                                         HorizontalAlignment="HorizontalAlignment.Center"
                                                          HorizontalGap="1"
                                                          VerticalGap="1">
-                                                <FluentStack Orientation="Orientation.Vertical"
+                                                <FluentStack Width="100px" Orientation="Orientation.Vertical"
                                                              VerticalAlignment="VerticalAlignment.Center"
-                                                             HorizontalAlignment="HorizontalAlignment.Start"
+                                                             HorizontalAlignment="HorizontalAlignment.Center"
                                                              VerticalGap="1">
                                                     <FluentCard Width="55px"
                                                                 Style="border:1px solid rgba(255,111,30,.2); padding:0;
@@ -203,23 +222,92 @@
                                                         <h4>@attendance.ActivityDate.Day</h4>
                                                     </FluentCard>
                                                 </FluentStack>
-                                                
-                                                <FluentStack Orientation="Orientation.Vertical" VerticalGap="1"
-                                                             HorizontalAlignment="HorizontalAlignment.Start">
-                                                <span>
-                                                    <FluentBadge Appearance="Appearance.Accent" Circular="true">
-                                                        @attendance.DisplayTotalHours
-                                                    </FluentBadge>
-                                                    @attendance.DisplayDate
-                                                </span>
-                                                    <div>
-                                                    <span style="font-size:smaller; color: grey; ">
-                                                        @attendance.DisplayTimeIn - @attendance.DisplayTimeOut
-                                                    </span>
-                                                        <p style="font-size:smaller;">
-                                                            @attendance.Id
-                                                        </p>
+                                                <FluentStack Style="@attendance.NotCurrentDayStyle"
+                                                             Orientation="Orientation.Vertical"
+                                                             HorizontalAlignment="HorizontalAlignment.Start"
+                                                             VerticalAlignment="VerticalAlignment.Top"
+                                                             VerticalGap="1" HorizontalGap="1">
+                                                    <div style="text-align:center;">
+                                                        @if (attendance.IsPresent)
+                                                        {
+                                                            <FluentEmoji Style="margin-right:3px;"
+                                                                         Value="@(new Emojis.Activities.Color.Default.ConfettiBall())"
+                                                                         Slot="start" Width="22"/>
+                                                        }
                                                     </div>
+                                                    @if (attendance.IsMissedThisDay)
+                                                    {
+                                                        <div style="padding:1px;">
+                                                            <img src="assets/media/images/absent.png"
+                                                                 style="width:100px;" alt="missed"/>
+                                                        </div>
+                                                    }
+                                                    else
+                                                    {
+                                                        <FluentStack Orientation="Orientation.Vertical" VerticalGap="1"
+                                                                     VerticalAlignment="VerticalAlignment.Center"
+                                                                     HorizontalAlignment="HorizontalAlignment.Start"
+                                                                     Style="margin-top:1px;">
+                                                            @if (attendance.TimeIn != null)
+                                                            {
+                                                                <div>
+                                                                    <FluentButton Id="@attendance.DisplayTimeInId"
+                                                                                  IconEnd="@(new Icons.Regular.Size16.CalendarCheckmark())"
+                                                                                  Appearance="Appearance.Stealth">
+                                                                        <FluentBadge Appearance="Appearance.Accent">
+                                                                            @attendance.DisplayTimeIn
+                                                                        </FluentBadge>
+                                                                    </FluentButton>
+                                                                    <FluentTooltip Anchor="@attendance.DisplayTimeInId"
+                                                                                   HideTooltipOnCursorLeave="true"
+                                                                                   Position=TooltipPosition.Top
+                                                                                   Delay=200>Time In
+                                                                    </FluentTooltip>
+                                                                </div>
+                                                            }
+                                                            else
+                                                            {
+                                                                <div>
+                                                                    <FluentButton
+                                                                        Disabled="@(!attendance.IsCurrentDay)"
+                                                                        IconEnd="@(new Icons.Regular.Size16.ClockAlarm())"
+                                                                        Appearance="Appearance.Accent">
+                                                                        Sign in
+                                                                    </FluentButton>
+                                                                </div>
+                                                            }
+
+                                                            @if (attendance is { TimeIn: not null, TimeOut: null })
+                                                            {
+                                                                <div>
+                                                                    <FluentButton
+                                                                        IconEnd="@(new Icons.Regular.Size16.ClockAlarm())"
+                                                                        Appearance="Appearance.Outline" Color="darkred">
+                                                                        Sign out
+                                                                    </FluentButton>
+                                                                </div>
+                                                            }
+                                                            @if (attendance.TimeOut != null)
+                                                            {
+                                                                <div>
+                                                                    <FluentButton Id="@attendance.DisplayTimeOutId"
+                                                                                  Color="green"
+                                                                                  Style="font-weight:bold;"
+                                                                                  IconEnd="@(new Icons.Regular.Size16.CalendarCheckmark())"
+                                                                                  Appearance="Appearance.Stealth">
+                                                                        <FluentBadge Appearance="Appearance.Accent">
+                                                                            @attendance.DisplayTimeOut
+                                                                        </FluentBadge>
+                                                                    </FluentButton>
+                                                                    <FluentTooltip Anchor="@attendance.DisplayTimeOutId"
+                                                                                   HideTooltipOnCursorLeave="true"
+                                                                                   Position=TooltipPosition.Top
+                                                                                   Delay=200>Time Out
+                                                                    </FluentTooltip>
+                                                                </div>
+                                                            }
+                                                        </FluentStack>
+                                                    }
                                                 </FluentStack>
                                             </FluentStack>
                                         }
