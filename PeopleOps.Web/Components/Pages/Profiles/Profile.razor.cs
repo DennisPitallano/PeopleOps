@@ -32,8 +32,12 @@ public partial class Profile : ComponentBase
     private long TotalLedgerPointsBalance { get; set; }
     private int TotalCompletedQuests { get; set; }
     
-    private bool IsLoadingData { get; set; } = false;
+    private bool IsLoadingData { get; set; }
     
+    bool DeferredLoading = false;
+
+    private bool _trapFocus = true;
+    private bool _modal = true;
     User? User { get; set; }
     protected override async Task OnInitializedAsync()
     {
@@ -50,8 +54,9 @@ public partial class Profile : ComponentBase
         await LoadCompletedQuests();
         await LoadWeeklyAttendance();
         IsLoadingData = false;
+
     }
-    
+
     // load completed quests
     private async Task LoadCompletedQuests()
     {
@@ -87,6 +92,48 @@ public partial class Profile : ComponentBase
         var query = new GetTotalCompletedQuests.Query { userid = Guid.Parse(user?.Id) };
         
         return await Sender.Send(query);
+    }
+    
+    private async Task OpenQuestCenterDialogAsync()
+    {
+        DialogParameters parameters = new()
+        {
+            Title = $"Hello {ProfileResponse.FirstName}",
+            TrapFocus = false,
+            Modal = _modal,
+            PreventScroll = true,
+            PreventDismissOnOverlayClick = true,
+            ShowTitle = false,
+            ShowDismiss = false,
+            Alignment = HorizontalAlignment.Center,
+            PrimaryAction = "",
+            SecondaryAction = "Close",
+        };
+
+        IDialogReference dialog = await DialogService.ShowDialogAsync<TaskCenterModal>(ProfileResponse, parameters);
+        DialogResult result = await dialog.Result;
+
+        if (result is { Cancelled: true, Data: not null })
+        {
+            await dialog.CloseAsync();
+            TotalLedgerPointsBalance = await GetTotalPoints();
+            TotalCompletedQuests = await GetTotalCompletedQuests();
+            await LoadCompletedQuests();
+        }
+    }
+
+    private async Task OpenCompleteProfileModalAsync()
+    {
+        DialogParameters parameters = new()
+        {
+            Title = $"Hello {ProfileResponse.FirstName}",
+            Height = "500px",
+            PreventDismissOnOverlayClick = true,
+            PreventScroll = true,
+        };
+
+        IDialogReference dialog = await DialogService.ShowDialogAsync<CompleteProfileModal>(ProfileResponse, parameters);
+        DialogResult result = await dialog.Result;
     }
     
 }
