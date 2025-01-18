@@ -3,42 +3,6 @@
 @attribute [Authorize]
 @rendermode InteractiveServer
 
-@code {
-    bool DeferredLoading = false;
-
-    private bool _trapFocus = true;
-    private bool _modal = true;
-
-    private async Task OpenDialogAsync()
-    {
-        DialogParameters parameters = new()
-        {
-            Title = $"Hello {ProfileResponse.FirstName}",
-            TrapFocus = false,
-            Modal = _modal,
-            PreventScroll = true,
-            PreventDismissOnOverlayClick = true,
-            ShowTitle = false,
-            ShowDismiss = false,
-            Alignment = HorizontalAlignment.Center,
-            PrimaryAction = "",
-            SecondaryAction = "Close",
-        };
-
-        IDialogReference dialog = await DialogService.ShowDialogAsync<TaskCenterModal>(ProfileResponse, parameters);
-        DialogResult result = await dialog.Result;
-
-        if (result is { Cancelled: true, Data: not null })
-        {
-            await dialog.CloseAsync();
-            TotalLedgerPointsBalance = await GetTotalPoints();
-            TotalCompletedQuests = await GetTotalCompletedQuests();
-            await LoadCompletedQuests();
-        }
-    }
-
-}
-
 <PageTitle>Profile</PageTitle>
 
 <FluentStack Orientation="Orientation.Vertical" VerticalAlignment="VerticalAlignment.Center"
@@ -71,14 +35,24 @@
         </div>
         <FluentStack Orientation="Orientation.Horizontal" VerticalAlignment="VerticalAlignment.Center"
                      HorizontalAlignment="HorizontalAlignment.Center">
-            <FluentLabel Color="Color.Custom" CustomColor="grey" Weight="FontWeight.Bold">
-                <FluentIcon Color="Color.Accent" Value="@(new Icons.Filled.Size12.Location())"/>
-                <span> PH, @ProfileResponse?.CityAddress </span>
-            </FluentLabel>
-            <FluentLabel Color="Color.Custom" CustomColor="grey" Weight="FontWeight.Bold">
-                <FluentIcon Value="@(new Icons.Filled.Size12.PersonCircle())"/>
-                <span> @ProfileResponse?.JobTitle </span>
-            </FluentLabel>
+            @if (ProfileResponse?.IsProfileIncomplete == true)
+            {
+                <FluentButton Appearance="Appearance.Accent" Style="font-weight:500; font-size:small;"
+                              @onclick="OpenCompleteProfileModalAsync">
+                    Complete Profile
+                </FluentButton>
+            }
+            else
+            {
+                <FluentLabel Color="Color.Custom" CustomColor="grey" Weight="FontWeight.Bold">
+                    <FluentIcon Color="Color.Accent" Value="@(new Icons.Filled.Size12.Location())"/>
+                    <span> PH, @ProfileResponse?.CityAddress </span>
+                </FluentLabel>
+                <FluentLabel Color="Color.Custom" CustomColor="grey" Weight="FontWeight.Bold">
+                    <FluentIcon Value="@(new Icons.Filled.Size12.PersonCircle())"/>
+                    <span> @ProfileResponse?.JobTitle </span>
+                </FluentLabel>
+            }
         </FluentStack>
     </FluentStack>
 </FluentStack>
@@ -90,7 +64,8 @@
                 <div slot="end">
                     <FluentCounterBadge Count="10" BackgroundColor="@Color.Error" Color="Color.Fill">
                         <ChildContent>
-                            <FluentButton @onclick="@OpenDialogAsync" Style="font-weight:500; font-size:small;">
+                            <FluentButton @onclick="@OpenQuestCenterDialogAsync"
+                                          Style="font-weight:500; font-size:small;">
                                 Quest Center
                             </FluentButton>
                         </ChildContent>
@@ -225,16 +200,8 @@
                                                 <FluentStack Style="@attendance.NotCurrentDayStyle"
                                                              Orientation="Orientation.Vertical"
                                                              HorizontalAlignment="HorizontalAlignment.Start"
-                                                             VerticalAlignment="VerticalAlignment.Top"
+                                                             VerticalAlignment="VerticalAlignment.Center"
                                                              VerticalGap="1" HorizontalGap="1">
-                                                    <div style="text-align:center;">
-                                                        @if (attendance.IsPresent)
-                                                        {
-                                                            <FluentEmoji Style="margin-right:3px;"
-                                                                         Value="@(new Emojis.Activities.Color.Default.ConfettiBall())"
-                                                                         Slot="start" Width="22"/>
-                                                        }
-                                                    </div>
                                                     @if (attendance.IsMissedThisDay)
                                                     {
                                                         <div style="padding:1px;">
@@ -309,6 +276,12 @@
                                                         </FluentStack>
                                                     }
                                                 </FluentStack>
+                                                <div style="text-align:start;">
+                                                    @if (attendance.IsPresent)
+                                                    {
+                                                        <span style="font-size:2.5rem;">🎉</span>
+                                                    }
+                                                </div>
                                             </FluentStack>
                                         }
                                     </div>
