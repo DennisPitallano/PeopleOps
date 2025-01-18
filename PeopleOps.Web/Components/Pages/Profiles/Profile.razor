@@ -225,16 +225,8 @@
                                                 <FluentStack Style="@attendance.NotCurrentDayStyle"
                                                              Orientation="Orientation.Vertical"
                                                              HorizontalAlignment="HorizontalAlignment.Start"
-                                                             VerticalAlignment="VerticalAlignment.Top"
+                                                             VerticalAlignment="VerticalAlignment.Center"
                                                              VerticalGap="1" HorizontalGap="1">
-                                                    <div style="text-align:center;">
-                                                        @if (attendance.IsPresent)
-                                                        {
-                                                            <FluentEmoji Style="margin-right:3px;"
-                                                                         Value="@(new Emojis.Activities.Color.Default.ConfettiBall())"
-                                                                         Slot="start" Width="22"/>
-                                                        }
-                                                    </div>
                                                     @if (attendance.IsMissedThisDay)
                                                     {
                                                         <div style="padding:1px;">
@@ -309,6 +301,12 @@
                                                         </FluentStack>
                                                     }
                                                 </FluentStack>
+                                                <div style="text-align:start;">
+                                                    @if (attendance.IsPresent)
+                                                    {
+                                                        <span style="font-size:2.5rem;">🎉</span>
+                                                    }
+                                                </div>
                                             </FluentStack>
                                         }
                                     </div>
