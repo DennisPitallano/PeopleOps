@@ -1,6 +1,42 @@
-﻿@using System.ComponentModel.DataAnnotations
+﻿@using MediatR
 @using PeopleOps.Web.Contracts
-@implements IDialogContentComponent<PeopleOps.Web.Contracts.ProfileResponse>
+@using PeopleOps.Web.Features.Profile
+@implements IDialogContentComponent<PeopleOps.Web.Contracts.ProfileRequest>
+@inject Supabase.Client SupabaseClient
+@inject ISender Sender
+
+@code
+{
+    private EditContext _editContext = null!;
+
+    [CascadingParameter] public FluentDialog Dialog { get; set; } = null!;
+
+    [Parameter] public ProfileRequest Content { get; set; } = null!;
+    bool loading = false;
+
+    protected override void OnInitialized()
+    {
+        _editContext = new EditContext(Content);
+    }
+
+    private async Task SaveAsync()
+    {
+        if (_editContext.Validate())
+        {
+            loading = true;
+            // update profile
+            var command = new UpdateProfile.Command { ProfileRequest = Content };
+            var response = await Sender.Send(command);
+            await Dialog.CloseAsync(response);
+            loading = false;
+        }
+    }
+
+    private async Task CancelAsync()
+    {
+        await Dialog.CancelAsync();
+    }
+}
 
 <!-- Header -->
 <FluentDialogHeader ShowDismiss="true">
@@ -16,32 +52,75 @@
 <FluentDialogBody>
     <EditForm EditContext="@_editContext" FormName="complete_profile">
         <DataAnnotationsValidator/>
-
-        <FluentLabel Style="margin-bottom: 16px;">
-            Your name must be between 3 and 20 characters long,
-            and your age between 1 and 99.
+        <FluentLabel Style="margin-bottom:10px; text-align:center;">
+            Please complete your profile
         </FluentLabel>
+        <FluentStack Orientation="Orientation.Vertical"
+                     VerticalGap="10">
+            <FluentStack Orientation="Orientation.Vertical"
+                         HorizontalAlignment="HorizontalAlignment.Start"
+                         VerticalAlignment="VerticalAlignment.Center"
+                         VerticalGap="0">
+                <FluentTextField Name="first_name" Style="width:100%"
+                                 @bind-Value="@Content.FirstName"
+                                 Label="First Name"
+                                 Required/>
+                <FluentValidationMessage For="@(() => Content.FirstName)"/>
+            </FluentStack>
+            <FluentStack Orientation="Orientation.Vertical"
+                         HorizontalAlignment="HorizontalAlignment.Start"
+                         VerticalAlignment="VerticalAlignment.Center"
+                         VerticalGap="0">
+                <FluentTextField Name="@nameof(Content.LastName)" Style="width:100%"
+                                 @bind-Value="@Content.LastName"
+                                 Label="Last Name"
+                                 Required/>
+                <FluentValidationMessage For="@(() => Content.LastName)"/>
+            </FluentStack>
+            <FluentStack Orientation="Orientation.Vertical"
+                         HorizontalAlignment="HorizontalAlignment.Start"
+                         VerticalAlignment="VerticalAlignment.Center"
+                         VerticalGap="0">
+                <FluentTextField Name="@nameof(Content.JobTitle)" Style="width:100%"
+                                 @bind-Value="@Content.JobTitle"
+                                 Label="Job Title"
+                                 Required/>
+                <FluentValidationMessage For="@(() => Content.JobTitle)"/>
+            </FluentStack>
+            <FluentStack Orientation="Orientation.Vertical"
+                         HorizontalAlignment="HorizontalAlignment.Start"
+                         VerticalAlignment="VerticalAlignment.Center"
+                         VerticalGap="0">
+                <FluentDatePicker Name="@nameof(Content.DateOfBirth)" Style="width:100%"
+                                  @bind-Value="@Content.DateOfBirth"
+                                  Label="Birth Date"
+                                  Required/>
+                <FluentValidationMessage For="@(() => Content.DateOfBirth)"/>
+            </FluentStack>
+            <FluentStack Orientation="Orientation.Vertical"
+                         HorizontalAlignment="HorizontalAlignment.Start"
+                         VerticalAlignment="VerticalAlignment.Center"
+                         VerticalGap="0">
+                <FluentTextField Name="@nameof(Content.CityAddress)" Style="width:100%"
+                                 @bind-Value="@Content.CityAddress"
+                                 Label="City Address"
+                                 Required/>
+                <FluentValidationMessage For="@(() => Content.CityAddress)"/>
+            </FluentStack>
+            <FluentStack Orientation="Orientation.Vertical"
+                         HorizontalAlignment="HorizontalAlignment.Start"
+                         VerticalAlignment="VerticalAlignment.Center"
+                         VerticalGap="0">
+                <FluentSwitch @bind-Value="@Content.Gender" Label="Gender">
+                    <span slot="checked-message" style="font-size:1.5rem;">🚹</span>
+                    <span slot="unchecked-message" style="font-size:1.5rem;">🚺</span>
+                </FluentSwitch>
+            </FluentStack>
 
-        <FluentStack Orientation="Orientation.Horizontal"
-                     HorizontalAlignment="HorizontalAlignment.Start"
-                     VerticalAlignment="VerticalAlignment.Center">
-            <FluentTextField Name="first_name"
-                             @bind-Value="@Content.FirstName"
-                             Label="First Name"
-                             Required/>
         </FluentStack>
-        <FluentStack Orientation="Orientation.Horizontal"
-                     HorizontalAlignment="HorizontalAlignment.Start"
-                     VerticalAlignment="VerticalAlignment.Center">
-            <FluentTextField Name="last_name"
-                             @bind-Value="@Content.LastName"
-                             Label="Last Name"
-                             Required/>
-        </FluentStack>
-
-        <div style="color: var(--error);">
+        @*<div style="color: var(--error);">
             <FluentValidationSummary/>
-        </div>
+        </div>*@
     </EditForm>
 </FluentDialogBody>
 
@@ -49,7 +128,8 @@
 <FluentDialogFooter>
     <FluentButton Appearance="Appearance.Accent"
                   Disabled="@(!_editContext.Validate())"
-                  OnClick="@SaveAsync">
+                  OnClick="@SaveAsync"
+                  Loading="loading">
         Save
     </FluentButton>
     <FluentButton Appearance="Appearance.Neutral"
@@ -58,29 +138,3 @@
     </FluentButton>
 </FluentDialogFooter>
 
-@code
-{
-    private EditContext _editContext = null!;
-
-    [CascadingParameter] public FluentDialog Dialog { get; set; } = null!;
-
-    [Parameter] public ProfileResponse Content { get; set; } = null!;
-
-    protected override void OnInitialized()
-    {
-        _editContext = new EditContext(Content);
-    }
-
-    private async Task SaveAsync()
-    {
-        if (_editContext.Validate())
-        {
-            await Dialog.CloseAsync(Content);
-        }
-    }
-
-    private async Task CancelAsync()
-    {
-        await Dialog.CancelAsync();
-    }
-}

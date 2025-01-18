@@ -4,7 +4,7 @@ using Supabase.Postgrest.Models;
 namespace PeopleOps.Web.Tables;
 
 [Table("users")]
-public class ProfileTable: BaseModel
+public class UserTable: BaseModel
 {
     [PrimaryKey("id")]
     public Guid Id { get; set; }

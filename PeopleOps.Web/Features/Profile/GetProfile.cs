@@ -3,7 +3,7 @@ using PeopleOps.Web.Contracts;
 using PeopleOps.Web.Tables;
 using Supabase;
 
-namespace PeopleOps.Web.Components.Pages.Profiles;
+namespace PeopleOps.Web.Features.Profile;
 
 public static class GetProfile
 {
@@ -19,7 +19,7 @@ public static class GetProfile
     {
         public async Task<ProfileResponse> Handle(Query request, CancellationToken cancellationToken)
         {
-            var profiles = await supabaseClient.From<ProfileTable>()
+            var profiles = await supabaseClient.From<UserTable>()
                 .Where(p => p.Id == request.Id)
                 .Get(cancellationToken).ConfigureAwait(false);
             var profile = profiles.Models.Single();

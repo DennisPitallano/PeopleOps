@@ -5,40 +5,37 @@ using PeopleOps.Web.Contracts;
 using PeopleOps.Web.Features.Attendance;
 using PeopleOps.Web.Features.Profile;
 using PeopleOps.Web.Features.Quest;
+using PeopleOps.Web.Features.User;
 using Supabase.Gotrue;
 using Client = Supabase.Client;
 
 namespace PeopleOps.Web.Components.Pages.Profiles;
 
-
 public partial class Profile : ComponentBase
 {
-    [Inject]
-    private ISender Sender { get; set; }
+    [Inject] private ISender Sender { get; set; }
 
-    [Inject]
-    private IDialogService DialogService { get;set; }
-    private ProfileResponse? ProfileResponse { get; set; }
-    
-    [Inject]
-    public Client Supabase { get; set; }
-    [Inject]
-    public AuthenticationStateProvider AuthenticationStateProvider { get; set; }
-    
+    [Inject] private IDialogService DialogService { get; set; }
+    private ProfileResponse ProfileResponse { get; set; } = new();
+
+    [Inject] public Client Supabase { get; set; }
+    [Inject] public AuthenticationStateProvider AuthenticationStateProvider { get; set; }
+
     private List<QuestTableResponse> CompletedQuests { get; set; } = [];
-    
+
     private List<AttendanceTableResponse> AttendanceActivities { get; set; } = [];
     
+    private List<UserResponse> Users { get; set; } = [];
+
     private long TotalLedgerPointsBalance { get; set; }
     private int TotalCompletedQuests { get; set; }
-    
-    private bool IsLoadingData { get; set; }
-    
-    bool DeferredLoading = false;
 
-    private bool _trapFocus = true;
+    private bool IsLoadingData { get; set; }
+
+    bool DeferredLoading = false;
     private bool _modal = true;
     User? User { get; set; }
+    string? comboboxValue;
     protected override async Task OnInitializedAsync()
     {
         IsLoadingData = true;
@@ -46,25 +43,25 @@ public partial class Profile : ComponentBase
         var state = await AuthenticationStateProvider.GetAuthenticationStateAsync();
         // send get query profile
         var query = new GetProfile.Query { Id = Guid.Parse(User?.Id) };
-        
+
         TotalLedgerPointsBalance = await GetTotalPoints();
         TotalCompletedQuests = await GetTotalCompletedQuests();
         ProfileResponse = await Sender.Send(query);
-        
+
         await LoadCompletedQuests();
         await LoadWeeklyAttendance();
+        Users = await GetAllUsersExcept();
         IsLoadingData = false;
-
     }
 
     // load completed quests
     private async Task LoadCompletedQuests()
     {
         var query = new GetCompletedQuest.Query { UserId = Guid.Parse(User?.Id) };
-        
+
         CompletedQuests = await Sender.Send(query);
     }
-    
+
     //load weekly attendance
     private async Task LoadWeeklyAttendance()
     {
@@ -72,28 +69,37 @@ public partial class Profile : ComponentBase
         {
             userid = Guid.Parse(User?.Id)
         };
-        
+
         AttendanceActivities = await Sender.Send(query);
     }
-    
+
     // get total points ledger balance
     private async Task<int> GetTotalPoints()
     {
         var user = Supabase.Auth.CurrentUser;
         var query = new GetTotalPointLedgerBalance.Query { userid = Guid.Parse(user?.Id) };
-        
+
         return await Sender.Send(query);
     }
-    
+
     // get total completed quests
     private async Task<int> GetTotalCompletedQuests()
     {
         var user = Supabase.Auth.CurrentUser;
         var query = new GetTotalCompletedQuests.Query { userid = Guid.Parse(user?.Id) };
-        
+
         return await Sender.Send(query);
     }
     
+    //get all users except the current user
+    private async Task<List<UserResponse>> GetAllUsersExcept()
+    {
+        var user = Supabase.Auth.CurrentUser;
+        var query = new GetAllUsersExcept.Query { userid = Guid.Parse(user?.Id) };
+
+        return await Sender.Send(query);
+    }
+
     private async Task OpenQuestCenterDialogAsync()
     {
         DialogParameters parameters = new()
@@ -124,16 +130,35 @@ public partial class Profile : ComponentBase
 
     private async Task OpenCompleteProfileModalAsync()
     {
+        ProfileRequest profileRequest = new()
+        {
+            Id = ProfileResponse.Id,
+            FirstName = ProfileResponse.FirstName,
+            LastName = ProfileResponse.LastName,
+            DateOfBirth = ProfileResponse.DateOfBirth,
+            CityAddress = ProfileResponse.CityAddress,
+            JobTitle = ProfileResponse.JobTitle,
+            Gender = ProfileResponse.Gender?? true
+        };
+        
         DialogParameters parameters = new()
         {
             Title = $"Hello {ProfileResponse.FirstName}",
-            Height = "500px",
+            Height = "550px",
+            Width = "400px",
             PreventDismissOnOverlayClick = true,
             PreventScroll = true,
         };
 
-        IDialogReference dialog = await DialogService.ShowDialogAsync<CompleteProfileModal>(ProfileResponse, parameters);
+        IDialogReference dialog =
+            await DialogService.ShowDialogAsync<CompleteProfileModal>(profileRequest, parameters);
         DialogResult result = await dialog.Result;
+        if (result is { Cancelled: false, Data: not null })
+        {
+          //  var updatedProfile = (ProfileRequest)result.Data;
+            //update profile
+           // var command = new UpdateProfile.Command { ProfileRequest = updatedProfile };
+           ProfileResponse =  (ProfileResponse)result.Data;
+        }
     }
-    
 }
