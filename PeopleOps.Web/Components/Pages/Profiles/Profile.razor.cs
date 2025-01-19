@@ -35,14 +35,16 @@ public partial class Profile : ComponentBase
     bool DeferredLoading = false;
     private bool _modal = true;
     User? User { get; set; }
+    string? UserGuid { get; set; }
     string? comboboxValue;
     protected override async Task OnInitializedAsync()
     {
         IsLoadingData = true;
-        User = Supabase.Auth.CurrentUser;
+       // User = Supabase.Auth.CurrentUser;
         var state = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        UserGuid = state.User.Claims.FirstOrDefault(c => c.Type == "sub")?.Value;
         // send get query profile
-        var query = new GetProfile.Query { Id = Guid.Parse(User?.Id) };
+        var query = new GetProfile.Query { Id = Guid.Parse(UserGuid) };
 
         TotalLedgerPointsBalance = await GetTotalPoints();
         TotalCompletedQuests = await GetTotalCompletedQuests();
@@ -57,7 +59,7 @@ public partial class Profile : ComponentBase
     // load completed quests
     private async Task LoadCompletedQuests()
     {
-        var query = new GetCompletedQuest.Query { UserId = Guid.Parse(User?.Id) };
+        var query = new GetCompletedQuest.Query { UserId = Guid.Parse(UserGuid) };
 
         CompletedQuests = await Sender.Send(query);
     }
@@ -67,7 +69,7 @@ public partial class Profile : ComponentBase
     {
         var query = new GetWeeklyAttendanceByUser.Query
         {
-            userid = Guid.Parse(User?.Id)
+            userid = Guid.Parse(UserGuid)
         };
 
         AttendanceActivities = await Sender.Send(query);
@@ -76,8 +78,7 @@ public partial class Profile : ComponentBase
     // get total points ledger balance
     private async Task<int> GetTotalPoints()
     {
-        var user = Supabase.Auth.CurrentUser;
-        var query = new GetTotalPointLedgerBalance.Query { userid = Guid.Parse(user?.Id) };
+        var query = new GetTotalPointLedgerBalance.Query { userid = Guid.Parse(UserGuid) };
 
         return await Sender.Send(query);
     }
@@ -85,8 +86,7 @@ public partial class Profile : ComponentBase
     // get total completed quests
     private async Task<int> GetTotalCompletedQuests()
     {
-        var user = Supabase.Auth.CurrentUser;
-        var query = new GetTotalCompletedQuests.Query { userid = Guid.Parse(user?.Id) };
+        var query = new GetTotalCompletedQuests.Query { userid = Guid.Parse(UserGuid) };
 
         return await Sender.Send(query);
     }
@@ -94,8 +94,7 @@ public partial class Profile : ComponentBase
     //get all users except the current user
     private async Task<List<UserResponse>> GetAllUsersExcept()
     {
-        var user = Supabase.Auth.CurrentUser;
-        var query = new GetAllUsersExcept.Query { userid = Guid.Parse(user?.Id) };
+        var query = new GetAllUsersExcept.Query { userid = Guid.Parse(UserGuid) };
 
         return await Sender.Send(query);
     }

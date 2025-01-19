@@ -1,13 +1,15 @@
 ﻿@page "/"
-@using System.Security.Claims
-@using Microsoft.AspNetCore.Authorization
-@using Microsoft.AspNetCore.Components.Authorization
+@using Blazored.LocalStorage
 @using Microsoft.Extensions.Caching.Hybrid
+@using Microsoft.Extensions.Caching.Memory
+@using Supabase.Gotrue
 @using Client = Supabase.Client
 @inject Client Supabase
 @inject IJSRuntime JsRuntime
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject HybridCache Cache
+@inject IMemoryCache MemoryCache
+@inject ILocalStorageService  LocalStorageService;
 @rendermode InteractiveServer
 
 <PageTitle>Home</PageTitle>
@@ -21,19 +23,23 @@
         </NotAuthorized>
     </AuthorizeView>
 </CascadingAuthenticationState>*@
-
 @code
 {
-    AuthenticationState pr;
     protected override async Task OnInitializedAsync()
     {
-        var user = Supabase.Auth.CurrentUser;
-       var result =   await Cache.GetOrCreateAsync("user", entry =>
+        await base.OnInitializedAsync();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
         {
-            var name = "Dennis Pitallano";
-            return ValueTask.FromResult(name); 
-        });
-      //  pr = await AuthenticationStateProvider.GetAuthenticationStateAsync();
-        //await base.OnInitializedAsync(); 
+            var token = await  LocalStorageService.GetItemAsync<string>("AccessToken");
+            var tokena = await  LocalStorageService.GetItemAsync<string>("at");
+            var pr = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+            var session =  MemoryCache.TryGetValue("authSession_", out Session? authSession);
+            var session1 =  MemoryCache.TryGetValue("authSession", out Session? authSession1);
+        }
+        await base.OnAfterRenderAsync(firstRender);    
     }
 }
