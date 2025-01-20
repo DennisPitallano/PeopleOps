@@ -1,0 +1,29 @@
+﻿using Supabase.Postgrest.Attributes;
+using Supabase.Postgrest.Models;
+
+namespace PeopleOps.Web.Tables;
+
+[Table("monthly_points")]
+public class MonthlyPointsTable : BaseModel
+{
+    [PrimaryKey("id")] 
+    public long Id { get; set; }
+
+    [Column("created_at")] 
+    public DateTime CreatedAt { get; set; }
+
+    [Column("month_year")] 
+    public DateOnly MonthYear { get; set; }
+    
+    [Column("points_allocated")] 
+    public int PointsAllocated { get; set; }
+    
+    [Column("points_spent")] 
+    public int PointsSpent { get; set; }
+
+    [Column("user_id")] 
+    public Guid UserId { get; set; }
+    
+    [Column("is_revoke")]
+    public bool IsRevoke { get; set; }
+}

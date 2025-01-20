@@ -1,0 +1,197 @@
+﻿@using MediatR
+@using PeopleOps.Web.Contracts
+@using PeopleOps.Web.Features.Acknowledgements
+@using PeopleOps.Web.Features.MonthlyPoints
+@implements IDialogContentComponent<PeopleOps.Web.Contracts.AcknowledgementRequest>
+@inject Supabase.Client SupabaseClient
+@inject ISender Sender
+
+@code
+{
+    private EditContext _editContext = null!;
+
+    [CascadingParameter] public FluentDialog Dialog { get; set; } = null!;
+
+    [Parameter] public AcknowledgementRequest Content { get; set; } = null!;
+    bool _loading;
+
+    private readonly HashSet<TagResponse> _visibleResourceTypes = new();
+
+    private readonly List<int> _availableCoins = [];
+    
+    private MonthlyPointsResponse? _monthlyPoints = new();
+    //a function that list of available coins depending on the available coins
+    private void SetAvailableCoins(int coins)
+    {
+        _availableCoins.Add(5);
+        _availableCoins.Add(15);
+
+        if (coins >= 50)
+        {
+            _availableCoins.Add(30);
+        }
+
+        if (coins == 100)
+        {
+            _availableCoins.Add(50);
+        }
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        _editContext = new EditContext(Content);
+        // get the available monthly coins
+        var getMonthlyPointQuery = new GetMonthlyPointsByUserId.Query
+        {
+            UserId = Content.SenderId
+        };
+        _monthlyPoints = await Sender.Send(getMonthlyPointQuery);
+        
+        SetAvailableCoins(_monthlyPoints?.AvailableCoins ?? 0);
+        
+        await base.OnInitializedAsync();
+    }
+
+    private async Task SaveAsync()
+    {
+        if (_editContext.Validate())
+        {
+            _loading = true;
+            // send acknowledgement
+            var command = new SendAcknowledgement.Command
+            {
+                AcknowledgementRequest = Content
+            };
+            
+           var response =   await Sender.Send(command);
+            await Dialog.CloseAsync(response);
+            _loading = false;
+        }
+    }
+
+    private async Task CancelAsync()
+    {
+        await Dialog.CancelAsync();
+    }
+
+    private void OnResourceTypeVisibilityChanged(TagResponse resourceType, bool isVisible)
+    {
+        if (isVisible)
+        {
+            _visibleResourceTypes.Add(resourceType);
+            Content.Message += $"\n{resourceType.TagName}";
+            Content.TagIds.Add(resourceType.Id);
+        }
+        else
+        {
+            _visibleResourceTypes.Remove(resourceType);
+            Content.Message = Content.Message.Replace($"\n{resourceType.TagName}", "");
+            Content.TagIds.Remove(resourceType.Id);
+        }
+    }
+
+    private bool? AreAllTypesVisible
+    {
+        get
+        {
+            if (_visibleResourceTypes.SetEquals(Content.AcknowledgementTags))
+                return true;
+            if (_visibleResourceTypes.Count == 0)
+                return false;
+            return null;
+        }
+        set
+        {
+            if (value == true)
+            {
+                _visibleResourceTypes.UnionWith(Content.AcknowledgementTags);
+                var message = Content.Message;
+                foreach (var resourceType in Content.AcknowledgementTags)
+                {
+                    if (!message.Contains(resourceType.TagName))
+                    {
+                        Content.Message += $"\n{resourceType.TagName}";
+                        Content.TagIds.Add(resourceType.Id);
+                    }
+                }
+            }
+            else if (value == false)
+            {
+                _visibleResourceTypes.Clear();
+                var message = Content.Message;
+                foreach (var resourceType in Content.AcknowledgementTags)
+                {
+                    if (message.Contains(resourceType.TagName))
+                    {
+                        Content.Message = Content.Message.Replace($"\n{resourceType.TagName}", "");
+                        Content.TagIds.Remove(resourceType.Id);
+                    }
+                }
+            }
+        }
+    }
+}
+<FluentDialogHeader Visible="false"/>
+<!-- Body -->
+<FluentDialogBody>
+    <EditForm EditContext="@_editContext" FormName="thank_you_form">
+        <DataAnnotationsValidator/>
+        <FluentStack Orientation="Orientation.Vertical"
+                     VerticalGap="0">
+            <FluentStack Orientation="Orientation.Vertical"
+                         HorizontalAlignment="HorizontalAlignment.Start"
+                         VerticalAlignment="VerticalAlignment.Center"
+                         VerticalGap="0">
+                <FluentTextArea Autofocus="true" Resize="TextAreaResize.Vertical"
+                                Rows="8"
+                                Name="message" Style="width:100%"
+                                @bind-Value="@Content.Message"
+                                Label="Message"
+                                Required/>
+                <FluentValidationMessage For="@(() => Content.Message)"/>
+            </FluentStack>
+        </FluentStack>
+        <div style="margin:10px;">
+            <FluentRadioGroup @bind-Value="Content.Coins"  Name="best-pilot" Label="@_monthlyPoints?.AvailableCoinsLabel">
+                @foreach (var coin in _availableCoins)
+                {
+                    <FluentRadio Value="@coin">
+                        <FluentBadge Appearance="Appearance.Neutral" Height="25" Style="font-size:1rem; font-weight:500;">
+                            +@coin 🪙
+                        </FluentBadge>
+                    </FluentRadio>
+                }
+            </FluentRadioGroup>
+        </div>
+        <div style="margin:10px;">
+            <h6>#Hash tags </h6>
+            <FluentStack Wrap="true" Orientation="Orientation.Horizontal">
+                <FluentCheckbox Label="@($"All")"
+                                ThreeState="true"
+                                ShowIndeterminate="false"
+                                @bind-CheckState="AreAllTypesVisible"/>
+                @foreach (var resourceType in Content.AcknowledgementTags)
+                {
+                    bool isChecked = _visibleResourceTypes.Contains(resourceType);
+                    <FluentCheckbox Label="@($"{resourceType.TagName}")"
+                                    @bind-Value:get="isChecked"
+                                    @bind-Value:set="c => OnResourceTypeVisibilityChanged(resourceType, c)"/>
+                }
+            </FluentStack>
+        </div>
+    </EditForm>
+</FluentDialogBody>
+
+<!-- Footer -->
+<FluentDialogFooter>
+    <FluentButton Appearance="Appearance.Accent"
+                  Disabled="@(!_editContext.Validate())"
+                  OnClick="@SaveAsync"
+                  Loading="_loading">
+        Save
+    </FluentButton>
+    <FluentButton Appearance="Appearance.Neutral"
+                  OnClick="@CancelAsync">
+        Cancel
+    </FluentButton>
+</FluentDialogFooter>

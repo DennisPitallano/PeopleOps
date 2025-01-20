@@ -5,6 +5,7 @@ using PeopleOps.Web.Contracts;
 using PeopleOps.Web.Features.Attendance;
 using PeopleOps.Web.Features.Profile;
 using PeopleOps.Web.Features.Quest;
+using PeopleOps.Web.Features.Tags;
 using PeopleOps.Web.Features.User;
 using Supabase.Gotrue;
 using Client = Supabase.Client;
@@ -36,7 +37,6 @@ public partial class Profile : ComponentBase
     private bool _modal = true;
     User? User { get; set; }
     string? UserGuid { get; set; }
-    string? comboboxValue;
     protected override async Task OnInitializedAsync()
     {
         IsLoadingData = true;
@@ -160,4 +160,46 @@ public partial class Profile : ComponentBase
            ProfileResponse =  (ProfileResponse)result.Data;
         }
     }
+    
+    private async Task OpenSendThankYouModalAsync(Guid receiverId)
+    {
+        
+        var acknowledgementTagsQuery = new GetAllHashTags.Query();
+        var acknowledgementTags = await Sender.Send(acknowledgementTagsQuery);
+        
+        AcknowledgementRequest acknowledgementRequest = new()
+        { 
+            ReceiverId = receiverId,
+            SenderId = ProfileResponse.Id,
+            AcknowledgmentDate = DateTime.Now,
+            AcknowledgementTags = acknowledgementTags,
+            Message = "Thank you for your hard work! 🙏 🎉",
+            ReceiverList = [receiverId],
+        };
+        
+        DialogParameters parameters = new()
+        {
+            Title = $"Hello {ProfileResponse.FirstName}",
+            TrapFocus = false,
+            Modal = _modal,
+            PreventScroll = true,
+            PreventDismissOnOverlayClick = true,
+            ShowTitle = false,
+            ShowDismiss = false,
+            Alignment = HorizontalAlignment.Center,
+            PrimaryAction = "",
+            SecondaryAction = "Close",
+        };
+
+        IDialogReference dialog = await DialogService.ShowDialogAsync<SendThankYouModal>(acknowledgementRequest, parameters);
+        DialogResult result = await dialog.Result;
+
+        if (result is { Cancelled: true, Data: not null })
+        {
+            TotalLedgerPointsBalance = await GetTotalPoints();
+            TotalCompletedQuests = await GetTotalCompletedQuests();
+            await LoadCompletedQuests();
+        }
+    }
+    
 }

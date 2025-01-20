@@ -189,6 +189,14 @@
                                     <h4 style="padding-left: 1rem;">Attendance Activity</h4>
                                     <FluentDivider Style="width: 100%;" Role="DividerRole.Presentation"></FluentDivider>
                                     <div style="margin-top: 1rem;">
+                                        @if (AttendanceActivities.Count == 0)
+                                        {
+                                            <div style="text-align:center;">
+                                                <h5>
+                                                  😟 No attendance activity yet.
+                                                </h5>
+                                            </div>
+                                        }
                                         @foreach (var attendance in AttendanceActivities)
                                         {
                                             <FluentStack Orientation="Orientation.Horizontal"
@@ -394,7 +402,8 @@
                                             <br/>
                                             <code style="color:#333333;">@(user.JobTitle ?? "N/A")</code>
                                         </p>
-                                        <FluentButton Appearance="Appearance.Outline">
+                                        <FluentButton Appearance="Appearance.Outline"
+                                                      OnClick="() => OpenSendThankYouModalAsync(user.Id)">
                                             Send a thank you note 🪙🎉
                                         </FluentButton>
                                     </FluentCard>

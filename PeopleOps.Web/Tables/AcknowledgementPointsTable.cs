@@ -3,8 +3,8 @@ using Supabase.Postgrest.Models;
 
 namespace PeopleOps.Web.Tables;
 
-[Table("acknowledgment_tags")]
-public class AcknowledgementTagTable : BaseModel
+[Table("acknowledgment_points")]
+public class AcknowledgementPointsTable : BaseModel
 {
     [PrimaryKey("id")]
     public long Id { get; set; }
@@ -15,7 +15,9 @@ public class AcknowledgementTagTable : BaseModel
     [Column("acknowledgment_id")]
     public long AcknowledgmentId { get; set; }
     
-    [Column("tag_id")]
-    public long TagId { get; set; }
+    [Column("receiver_id")]
+    public Guid ReceiverId { get; set; }
     
+    [Column("points_earned")]
+    public int Coins { get; set; }
 }

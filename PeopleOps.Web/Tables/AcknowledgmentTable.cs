@@ -13,10 +13,10 @@ public class AcknowledgmentTable : BaseModel
     public DateTime CreatedAt { get; set; }
     
     [Column("sender_id")]
-    public long SenderId { get; set; }
+    public Guid SenderId { get; set; }
     
-    [Column("receiver_id")]
-    public long ReceiverId { get; set; }
+    /*[Column("receiver_id")]
+    public Guid ReceiverId { get; set; }*/
     
     [Column("acknowledgment_date")]
     public DateTime AcknowledgmentDate { get; set; }
