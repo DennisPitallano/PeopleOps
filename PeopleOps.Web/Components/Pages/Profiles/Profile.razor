@@ -86,7 +86,7 @@
                         <BadgeTemplate>New📃!</BadgeTemplate>
                     </FluentCounterBadge>
                 </div>
-                <FluentTab Label="Profile" Icon="@(new Icons.Regular.Size32.Person())" Id="tab-1">
+                <FluentTab Label="Home" Icon="@(new Icons.Regular.Size32.Home())" Id="tab-1">
                     <FluentCard MinimalStyle="true"
                                 Style="margin-top:1.5em; box-shadow: 0px 3px 4px 0px rgba(0, 0, 0, .03) !important;border-radius: .75rem !important; border: 1px solid  #f1f1f4; !important;">
                         <FluentStack Orientation="Orientation.Horizontal"
@@ -127,8 +127,8 @@
                                             @TotalLedgerPointsBalance
                                         }
                                     </FluentLabel>
-                                    <FluentLabel Color="Color.Custom" CustomColor="grey" Style="font-weight:500;">Coins
-                                        earned
+                                    <FluentLabel Color="Color.Custom" CustomColor="grey" Style="font-weight:500;">
+                                       Redeemable Coins
                                     </FluentLabel>
                                 </FluentGridItem>
                             </FluentGrid>
@@ -175,7 +175,7 @@
                     </FluentCard>
 
                     <FluentGrid Spacing="3" Style="margin-top:2rem;" Justify="JustifyContent.FlexStart">
-                        <FluentGridItem xs="12" sm="4" HiddenWhen="GridItemHidden.SmAndDown">
+                        <FluentGridItem xs="3" sm="4" HiddenWhen="GridItemHidden.SmAndDown">
                             <FluentStack Orientation="Orientation.Vertical" VerticalAlignment="VerticalAlignment.Center"
                                          HorizontalAlignment="HorizontalAlignment.Start">
                                 <FluentCard Height="300" AreaRestricted="true" MinimalStyle="true"
@@ -193,7 +193,7 @@
                                         {
                                             <div style="text-align:center;">
                                                 <h5>
-                                                  😟 No attendance activity yet.
+                                                    😟 No attendance activity yet.
                                                 </h5>
                                             </div>
                                         }
@@ -318,55 +318,10 @@
                             </FluentStack>
 
                         </FluentGridItem>
-                        <FluentGridItem xs="12" sm="8">
-                            <FluentCard MinimalStyle="true"
-                                        Style="padding:0.5rem; box-shadow: 0px 3px 4px 0px rgba(0, 0, 0, .03) !important;border-radius: .75rem !important; border: 1px solid  #f1f1f4; !important;">
-                                @if (IsLoadingData)
-                                {
-                                    <FluentProgressRing Width="22px" Stroke="ProgressStroke.Small"/>
-                                }
-                                else
-                                {
-                                    <h4 style="padding-left: 1rem;">
-                                        @ProfileResponse?.FirstName's Quests
-                                    </h4>
-                                }
-                                <FluentDivider Style="width: 100%;" Role="DividerRole.Separator"></FluentDivider>
-                                <div style="margin-top: 1rem;">
-                                    @foreach (var completedQuest in CompletedQuests)
-                                    {
-                                        <FluentStack Orientation="Orientation.Horizontal"
-                                                     VerticalAlignment="VerticalAlignment.Center"
-                                                     HorizontalAlignment="HorizontalAlignment.Start" HorizontalGap="2"
-                                                     VerticalGap="2">
-                                            <FluentDivider Style="height:68px;border:1px solid #1b6ec2"
-                                                           Role="DividerRole.Separator"
-                                                           Orientation="Orientation.Vertical"></FluentDivider>
-                                            <FluentStack Orientation="Orientation.Vertical" VerticalGap="1"
-                                                         HorizontalAlignment="HorizontalAlignment.Start">
-                                                <span>
-                                                    <FluentBadge Appearance="Appearance.Accent" Circular="true">
-                                                        @completedQuest.QuestGroup
-                                                    </FluentBadge>
-                                                    @completedQuest.QuestName
-                                                </span>
-                                                <div>
-                                                    <span style="font-size:smaller; color: grey; ">
-                                                        @completedQuest.CompletionDateDisplay
-                                                        <FluentBadge Appearance="Appearance.Neutral" Circular="true">
-                                                            🪙@completedQuest.QuestPoints 
-                                                        </FluentBadge>
-                                                    </span>
-                                                    <p style="font-size:smaller;">
-                                                        @completedQuest.QuestDescription
-                                                    </p>
-                                                </div>
-                                            </FluentStack>
-                                        </FluentStack>
-                                    }
-                                </div>
-                            </FluentCard>
+                        <FluentGridItem xs="8">
+                            <Feeds></Feeds>
                         </FluentGridItem>
+                 
                     </FluentGrid>
                 </FluentTab>
                 <FluentTab Label="Teams" Id="tab-2" DeferredLoading="@DeferredLoading">
@@ -404,7 +359,7 @@
                                         </p>
                                         <FluentButton Appearance="Appearance.Outline"
                                                       OnClick="() => OpenSendThankYouModalAsync(user.Id)">
-                                            Send a thank you note 🪙🎉
+                                            Acknowledge 🪙🎉
                                         </FluentButton>
                                     </FluentCard>
                                 </FluentGridItem>
@@ -413,13 +368,55 @@
                     </Content>
                 </FluentTab>
                 <FluentTab Label="Activity" Id="tab-3" DeferredLoading="@DeferredLoading">
-                    @{
-                        if (DeferredLoading)
-                        {
-                            Thread.Sleep(1000);
-                        }
-                    }
-                    Tab three content. This is for testing.
+                    <FluentGridItem xs="12" sm="8">
+                        <FluentCard MinimalStyle="true"
+                                    Style="padding:0.5rem; box-shadow: 0px 3px 4px 0px rgba(0, 0, 0, .03) !important;border-radius: .75rem !important; border: 1px solid  #f1f1f4; !important;" Class="p-card">
+                            @if (IsLoadingData)
+                            {
+                                <FluentProgressRing Width="22px" Stroke="ProgressStroke.Small"/>
+                            }
+                            else
+                            {
+                                <h4 style="padding-left: 1rem;">
+                                    @ProfileResponse?.FirstName's Quests
+                                </h4>
+                            }
+                            <FluentDivider Style="width: 100%;" Role="DividerRole.Separator"></FluentDivider>
+                            <div style="margin-top: 1rem;">
+                                @foreach (var completedQuest in CompletedQuests)
+                                {
+                                    <FluentStack Orientation="Orientation.Horizontal"
+                                                 VerticalAlignment="VerticalAlignment.Center"
+                                                 HorizontalAlignment="HorizontalAlignment.Start" HorizontalGap="2"
+                                                 VerticalGap="2">
+                                        <FluentDivider Style="height:68px;border:1px solid #1b6ec2"
+                                                       Role="DividerRole.Separator"
+                                                       Orientation="Orientation.Vertical"></FluentDivider>
+                                        <FluentStack Orientation="Orientation.Vertical" VerticalGap="1"
+                                                     HorizontalAlignment="HorizontalAlignment.Start">
+                                                <span>
+                                                    <FluentBadge Appearance="Appearance.Accent" Circular="true">
+                                                        @completedQuest.QuestGroup
+                                                    </FluentBadge>
+                                                    @completedQuest.QuestName
+                                                </span>
+                                            <div>
+                                                    <span style="font-size:smaller; color: grey; ">
+                                                        @completedQuest.CompletionDateDisplay
+                                                        <FluentBadge Appearance="Appearance.Neutral" Circular="true">
+                                                            🪙@completedQuest.QuestPoints 
+                                                        </FluentBadge>
+                                                    </span>
+                                                <p style="font-size:smaller;">
+                                                    @completedQuest.QuestDescription
+                                                </p>
+                                            </div>
+                                        </FluentStack>
+                                    </FluentStack>
+                                }
+                            </div>
+                        </FluentCard>
+                    </FluentGridItem>
                 </FluentTab>
             </FluentTabs>
         </div>

@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 
 namespace PeopleOps.Web.Contracts;
 
@@ -33,12 +34,17 @@ public class AcknowledgementRequest
 
 public class AcknowledgementResponse
 {
+    [JsonPropertyName("id")]
     public long Id { get; set; }
+    [JsonPropertyName("created_at")]
     public DateTime CreatedAt { get; set; }
+    [JsonPropertyName("sender_id")]
     public Guid SenderId { get; set; }
-    public Guid ReceiverId { get; set; }
+    [JsonPropertyName("acknowledgment_date")]
     public DateTime AcknowledgmentDate { get; set; }
+    [JsonPropertyName("message")]
     public string Message { get; set; }
+    
 }
 
 public class AcknowledgementTagResponse

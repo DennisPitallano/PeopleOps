@@ -15,9 +15,6 @@ public class AcknowledgmentTable : BaseModel
     [Column("sender_id")]
     public Guid SenderId { get; set; }
     
-    /*[Column("receiver_id")]
-    public Guid ReceiverId { get; set; }*/
-    
     [Column("acknowledgment_date")]
     public DateTime AcknowledgmentDate { get; set; }
     
