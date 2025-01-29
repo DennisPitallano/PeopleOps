@@ -1,7 +1,5 @@
-﻿using MediatR;
-using Microsoft.FluentUI.AspNetCore.Components.Extensions;
+﻿using Microsoft.FluentUI.AspNetCore.Components.Extensions;
 using PeopleOps.Web.Tables;
-using Supabase;
 
 namespace PeopleOps.Web.Features.Attendance;
 

@@ -45,7 +45,7 @@
     private string? ReturnUrl { get; set; }
 
     [Inject]
-    AuthService AuthService { get; set; } = default!;
+    SupabaseAuthService SupabaseAuthService { get; set; } = default!;
     [Inject]
     NavigationManager NavigationManager { get; set; } = default!;
     string userName = "";
@@ -54,7 +54,7 @@
     string error;
     private async Task HandleValidSubmit()
     {
-        var result = await AuthService.LoginAsync(_loginModel.Email, _loginModel.Password);
+        var result = await SupabaseAuthService.LoginAsync(_loginModel.Email, _loginModel.Password);
         
         if (result.IsSuccess)
         {

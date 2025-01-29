@@ -1,7 +1,5 @@
-﻿using MediatR;
-using PeopleOps.Web.Contracts;
+﻿using PeopleOps.Web.Contracts;
 using PeopleOps.Web.Tables;
-using Supabase;
 
 namespace PeopleOps.Web.Features.Tags;
 

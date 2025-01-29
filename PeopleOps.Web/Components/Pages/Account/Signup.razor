@@ -47,14 +47,14 @@
 @code {
     private readonly RegisterModel _registerModel = new();
 
-    [Inject] AuthService AuthService { get; set; } = null!;
+    [Inject] SupabaseAuthService SupabaseAuthService { get; set; } = null!;
     [Inject] NavigationManager NavigationManager { get; set; } = null!;
     string? _error;
     bool? _canceled;
 
     private async Task HandleValidSubmit()
     {
-         var result = await AuthService.RegisterAsync(_registerModel);
+         var result = await SupabaseAuthService.RegisterAsync(_registerModel);
 
         if (result.IsSuccess)
         {

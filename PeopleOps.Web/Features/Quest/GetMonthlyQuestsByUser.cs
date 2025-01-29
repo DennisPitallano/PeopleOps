@@ -1,10 +1,8 @@
 ﻿using System.Globalization;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using MediatR;
 using Microsoft.FluentUI.AspNetCore.Components.Extensions;
 using PeopleOps.Web.Contracts;
-using Supabase;
 
 namespace PeopleOps.Web.Features.Quest;
 

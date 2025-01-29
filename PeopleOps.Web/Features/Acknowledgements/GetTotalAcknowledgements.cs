@@ -1,7 +1,5 @@
 ﻿using System.Text.Json;
 using System.Text.Json.Serialization;
-using MediatR;
-using Supabase;
 
 namespace PeopleOps.Web.Features.Acknowledgements;
 

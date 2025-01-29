@@ -1,5 +1,4 @@
 ﻿using System.Security.Claims;
-using Microsoft.AspNetCore.Components.Authorization;
 
 namespace PeopleOps.Web.Services;
 

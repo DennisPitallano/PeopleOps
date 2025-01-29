@@ -1,18 +1,16 @@
 ﻿using System.Security.Claims;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Components.Authorization;
 using PeopleOps.Web.Services;
-using Supabase;
 
 namespace PeopleOps.Web.Providers;
 
 public class SupabaseAuthenticationStateProvider : AuthenticationStateProvider
 {
-    private readonly AuthService _authService;
+    private readonly SupabaseAuthService _supabaseAuthService;
     private readonly Client _client;
-    public SupabaseAuthenticationStateProvider(AuthService authService, Client client)
+    public SupabaseAuthenticationStateProvider(SupabaseAuthService supabaseAuthService, Client client)
     {
-        _authService = authService;
+        _supabaseAuthService = supabaseAuthService;
         _client = client;
     }
 
@@ -23,7 +21,7 @@ public class SupabaseAuthenticationStateProvider : AuthenticationStateProvider
             var supabaseUser =  _client.Auth.CurrentUser;
             var supabaseSession = _client.Auth.CurrentSession;
             
-            var claims = await _authService.GetLoginInfoAsync();
+            var claims = await _supabaseAuthService.GetLoginInfoAsync();
             var claimsIdentity = claims.Count != 0
                 ? new ClaimsIdentity(claims, JwtBearerDefaults.AuthenticationScheme, "name", "role")
                 : new ClaimsIdentity();

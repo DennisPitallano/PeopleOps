@@ -1,7 +1,4 @@
-﻿using MediatR;
-using Supabase;
-
-namespace PeopleOps.Web.Features.Quest;
+﻿namespace PeopleOps.Web.Features.Quest;
 
 public static class GenerateMonthlyQuest
 {

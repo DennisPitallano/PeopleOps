@@ -1,6 +1,5 @@
 ﻿using System.Security.Claims;
 using System.Text.Json;
-using Microsoft.AspNetCore.Components.Authorization;
 using PeopleOps.Web.Models;
 
 namespace PeopleOps.Web.Services;

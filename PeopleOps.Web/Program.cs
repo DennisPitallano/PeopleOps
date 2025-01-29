@@ -2,15 +2,14 @@ using Auth0.AspNetCore.Authentication;
 using Blazored.LocalStorage;
 using Hangfire;
 using Hangfire.MemoryStorage;
-using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.Extensions.Caching.Hybrid;
 using Microsoft.FluentUI.AspNetCore.Components.Components.Tooltip;
 using PeopleOps.Web.Components.Pages.Account;
+using PeopleOps.Web.Extensions;
+using PeopleOps.Web.Identity;
 using PeopleOps.Web.Providers;
 using PeopleOps.Web.Services;
-using Supabase;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -28,31 +27,18 @@ builder.Services.AddBlazoredLocalStorage();
 builder.Services.AddScoped<IdentityRedirectManager>();
 builder.Services.AddScoped<ILocalStorageServices, LocalStorageService>();
 builder.Services.AddScoped<RedisSessionHandler>();
-builder.Services.AddScoped<AuthService>();
+builder.Services.AddScoped<SupabaseAuthService>();
 builder.Services.AddScoped<UserService>();
-/*builder.Services.AddScoped<AuthenticationStateProvider, SupabaseAuthenticationStateProvider>();
-builder.Services.AddSingleton<IAuthorizationMiddlewareResultHandler, BlazorAuthorizationMiddlewareResultHandler>();*/
-
-
-/*
-builder.Services.AddAuthentication()
-    .AddCookie(options =>
-    {
-        options.LoginPath = "/Login";
-        options.Events.OnRedirectToLogin = context =>
-        {
-            context.Response.Redirect(context.RedirectUri);
-            return Task.CompletedTask;
-        };
-    });
-    */
+//builder.Services.AddScoped<AuthenticationStateProvider, SupabaseAuthenticationStateProvider>();
+builder.Services.AddScoped<AuthenticationStateProvider, PersistingRevalidatingAuthenticationStateProvider>();
 
 builder.Services.AddAuth0WebAppAuthentication(options =>
 {
-    options.Domain = builder.Configuration["Auth0:Domain"];
-    options.ClientId = builder.Configuration["Auth0:ClientId"];
+    options.Domain = builder.Configuration["Auth0:Domain"]!;
+    options.ClientId = builder.Configuration["Auth0:ClientId"]!;
     options.Scope = "openid profile email";
 });
+builder.Services.AddSingleton<IAuthorizationMiddlewareResultHandler, BlazorAuthorizationMiddlewareResultHandler>();
 
 
 builder.Services.AddFluentUIComponents();
@@ -95,11 +81,11 @@ var options = new SupabaseOptions
     AutoRefreshToken = true,
     AutoConnectRealtime = true,
     //SessionHandler = new InMemorySessionHandler()
-    SessionHandler = new RedisSessionHandler()
+    //SessionHandler = new RedisSessionHandler()
     
 };
 // Note the creation as a singleton.
-builder.Services.AddSingleton(_ => new Client(url, key, options));
+builder.Services.AddScoped(_ => new Client(url, key, options));
 
 builder.Services.AddScoped<ITooltipService, TooltipService>();
 
@@ -133,24 +119,8 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 
-app.MapGet("/Account/Login", async (HttpContext httpContext, string returnUrl = "/") =>
-{
-    var authenticationProperties = new LoginAuthenticationPropertiesBuilder()
-        .WithRedirectUri(returnUrl)
-        .Build();
-
-    await httpContext.ChallengeAsync(Auth0Constants.AuthenticationScheme, authenticationProperties);
-});
-
-app.MapGet("/Account/Logout", async (HttpContext httpContext) =>
-{
-    var authenticationProperties = new LogoutAuthenticationPropertiesBuilder()
-        .WithRedirectUri("/")
-        .Build();
-
-    await httpContext.SignOutAsync(Auth0Constants.AuthenticationScheme, authenticationProperties);
-    await httpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
-});
+// setup auth endpoints
+app.SetupAuthEndpoints();
 
 app.UseHttpsRedirection();
 

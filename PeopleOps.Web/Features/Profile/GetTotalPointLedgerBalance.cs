@@ -1,7 +1,4 @@
-﻿using MediatR;
-using Supabase;
-
-namespace PeopleOps.Web.Features.Profile;
+﻿namespace PeopleOps.Web.Features.Profile;
 
 public static class GetTotalPointLedgerBalance
 {

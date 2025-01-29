@@ -1,5 +1,4 @@
-﻿using MediatR;
-using Microsoft.AspNetCore.Components;
+﻿using Microsoft.AspNetCore.Components;
 using PeopleOps.Web.Contracts;
 using PeopleOps.Web.Features.Acknowledgements;
 

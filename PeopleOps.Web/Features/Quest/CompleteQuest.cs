@@ -1,6 +1,4 @@
-﻿using MediatR;
-using PeopleOps.Web.Tables;
-using Supabase;
+﻿using PeopleOps.Web.Tables;
 
 namespace PeopleOps.Web.Features.Quest;
 

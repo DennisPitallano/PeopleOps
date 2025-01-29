@@ -1,5 +1,4 @@
-﻿using MediatR;
-using PeopleOps.Web.Contracts;
+﻿using PeopleOps.Web.Contracts;
 using PeopleOps.Web.Tables;
 using Supabase.Postgrest;
 using Client = Supabase.Client;

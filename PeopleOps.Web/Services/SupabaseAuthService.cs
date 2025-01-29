@@ -5,14 +5,13 @@ using FluentResults;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
 using Microsoft.Extensions.Caching.Hybrid;
-using Microsoft.Extensions.Caching.Memory;
 using PeopleOps.Web.Helpers;
 using PeopleOps.Web.Models;
 using Supabase.Gotrue;
 
 namespace PeopleOps.Web.Services;
 
-public class AuthService
+public class SupabaseAuthService
 {
     private const string AccessToken = nameof(AccessToken);
     private const string RefreshToken = nameof(RefreshToken);
@@ -24,7 +23,7 @@ public class AuthService
     private readonly RedisSessionHandler _sessionHandler;
     private readonly HybridCache _memoryCache;
 
-    public AuthService(NavigationManager navigation, IConfiguration configuration, Supabase.Client supaBaseClient,
+    public SupabaseAuthService(NavigationManager navigation, IConfiguration configuration, Supabase.Client supaBaseClient,
         ProtectedLocalStorage localStorage, RedisSessionHandler sessionHandler, HybridCache memoryCache)
     {
         _navigation = navigation;

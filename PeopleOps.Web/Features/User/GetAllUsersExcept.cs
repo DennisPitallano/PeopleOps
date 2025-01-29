@@ -1,9 +1,7 @@
 ﻿using System.Text.Json;
 using System.Text.Json.Serialization;
-using MediatR;
 using PeopleOps.Web.Contracts;
 using PeopleOps.Web.Tables;
-using Supabase;
 
 namespace PeopleOps.Web.Features.User;
 

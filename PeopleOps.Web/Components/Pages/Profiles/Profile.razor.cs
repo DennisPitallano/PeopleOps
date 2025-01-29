@@ -1,6 +1,4 @@
-﻿using MediatR;
-using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Components.Authorization;
+﻿using Microsoft.AspNetCore.Components;
 using PeopleOps.Web.Contracts;
 using PeopleOps.Web.Features.Acknowledgements;
 using PeopleOps.Web.Features.Attendance;
@@ -43,7 +41,7 @@ public partial class Profile : ComponentBase
         IsLoadingData = true;
        // User = Supabase.Auth.CurrentUser;
         var state = await AuthenticationStateProvider.GetAuthenticationStateAsync();
-        UserGuid = state.User.Claims.FirstOrDefault(c => c.Type == "sub")?.Value;
+        UserGuid = "58b0c833-ee77-4230-8b43-0e59f6fb0541"; //state.User.Claims.FirstOrDefault(c => c.Type == "sub")?.Value;
         // send get query profile
         var query = new GetProfile.Query { Id = Guid.Parse(UserGuid) };
 

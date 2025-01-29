@@ -1,8 +1,6 @@
 ﻿using System.Text.Json;
 using System.Text.Json.Serialization;
-using MediatR;
 using PeopleOps.Web.Contracts;
-using Supabase;
 
 namespace PeopleOps.Web.Features.Quest;
 
