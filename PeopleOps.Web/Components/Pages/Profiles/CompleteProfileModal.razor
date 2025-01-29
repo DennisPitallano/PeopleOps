@@ -2,8 +2,8 @@
 @using PeopleOps.Web.Contracts
 @using PeopleOps.Web.Features.Profile
 @implements IDialogContentComponent<PeopleOps.Web.Contracts.ProfileRequest>
-@inject Supabase.Client SupabaseClient
 @inject ISender Sender
+@rendermode InteractiveServer
 
 @code
 {
@@ -12,7 +12,7 @@
     [CascadingParameter] public FluentDialog Dialog { get; set; } = null!;
 
     [Parameter] public ProfileRequest Content { get; set; } = null!;
-    bool loading = false;
+    bool _loading;
 
     protected override void OnInitialized()
     {
@@ -23,12 +23,12 @@
     {
         if (_editContext.Validate())
         {
-            loading = true;
+            _loading = true;
             // update profile
             var command = new UpdateProfile.Command { ProfileRequest = Content };
             var response = await Sender.Send(command);
             await Dialog.CloseAsync(response);
-            loading = false;
+            _loading = false;
         }
     }
 
@@ -129,7 +129,7 @@
     <FluentButton Appearance="Appearance.Accent"
                   Disabled="@(!_editContext.Validate())"
                   OnClick="@SaveAsync"
-                  Loading="loading">
+                  Loading="_loading">
         Save
     </FluentButton>
     <FluentButton Appearance="Appearance.Neutral"

@@ -10,8 +10,8 @@ public class QuestTableResponse
     [JsonPropertyName("created_at")]
     public DateTime CreatedAt { get; set; }
     
-    [JsonPropertyName("user_id")]
-    public Guid UserId { get; set; }
+    [JsonPropertyName("profile_id")]
+    public int ProfileId { get; set; }
     
     [JsonPropertyName("quest_id")]
     public long QuestId { get; set; }

@@ -12,8 +12,8 @@ public class AttendanceTable : BaseModel
     [Column("created_at")]
     public DateTime? CreatedAt { get; set; }
     
-    [Column("user_id")]
-    public Guid UserId { get; set; }
+    [Column("profile_id")]
+    public int ProfileId { get; set; }
     
     [Column("login_time")]
     public DateTime? TimeIn { get; set; } 

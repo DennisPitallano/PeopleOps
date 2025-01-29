@@ -29,6 +29,21 @@ builder.Services.AddScoped<ILocalStorageServices, LocalStorageService>();
 builder.Services.AddScoped<RedisSessionHandler>();
 builder.Services.AddScoped<SupabaseAuthService>();
 builder.Services.AddScoped<UserService>();
+
+// register supabase client
+var url = builder.Configuration["SUPABASE_URL"];
+var key = builder.Configuration["SUPABASE_KEY"];
+var options = new SupabaseOptions
+{
+    AutoRefreshToken = true,
+    AutoConnectRealtime = true,
+    //SessionHandler = new InMemorySessionHandler()
+    //SessionHandler = new RedisSessionHandler()
+    
+};
+// Note the creation as a singleton.
+builder.Services.AddScoped(_ => new Client(url, key, options));
+
 //builder.Services.AddScoped<AuthenticationStateProvider, SupabaseAuthenticationStateProvider>();
 builder.Services.AddScoped<AuthenticationStateProvider, PersistingRevalidatingAuthenticationStateProvider>();
 
@@ -37,6 +52,11 @@ builder.Services.AddAuth0WebAppAuthentication(options =>
     options.Domain = builder.Configuration["Auth0:Domain"]!;
     options.ClientId = builder.Configuration["Auth0:ClientId"]!;
     options.Scope = "openid profile email";
+    /*options.OpenIdConnectEvents.OnTokenValidated = async context =>
+    {
+       // var userService = context.HttpContext.RequestServices.GetRequiredService<UserService>();
+      //  await userService.CreateUserAsync(context.Principal);
+    };*/
 });
 builder.Services.AddSingleton<IAuthorizationMiddlewareResultHandler, BlazorAuthorizationMiddlewareResultHandler>();
 
@@ -72,20 +92,6 @@ builder.Services.AddHybridCache(options =>
 
 // register mediatr
 builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssemblyContaining<Program>());
-
-// register supabase client
-var url = builder.Configuration["SUPABASE_URL"];
-var key = builder.Configuration["SUPABASE_KEY"];
-var options = new SupabaseOptions
-{
-    AutoRefreshToken = true,
-    AutoConnectRealtime = true,
-    //SessionHandler = new InMemorySessionHandler()
-    //SessionHandler = new RedisSessionHandler()
-    
-};
-// Note the creation as a singleton.
-builder.Services.AddScoped(_ => new Client(url, key, options));
 
 builder.Services.AddScoped<ITooltipService, TooltipService>();
 

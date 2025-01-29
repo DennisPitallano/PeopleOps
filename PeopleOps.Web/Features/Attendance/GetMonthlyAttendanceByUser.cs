@@ -11,7 +11,7 @@ public static class GetMonthlyAttendanceByUser
     //query to get monthly attendance
     public class Query : IRequest<List<AttendanceTableResponse>>
     {
-        public Guid userid { get; set; }
+        public int profileid { get; set; }
         public DateOnly start_date { get; set; }
         public DateOnly end_date { get; set; }
     }
@@ -27,7 +27,7 @@ public static class GetMonthlyAttendanceByUser
             request.end_date = DateOnly.FromDateTime(DateTime.Now.EndOfMonth(CultureInfo.CurrentCulture));
             
             var baseResponse = await supabaseClient.Rpc("get_working_days",
-                    new {request.end_date,request.start_date,request.userid})
+                    new {request.end_date,request.profileid,request.start_date})
                 .ConfigureAwait(false);
             //convert the response to a list of dates
             if (baseResponse.ResponseMessage is { IsSuccessStatusCode: true })

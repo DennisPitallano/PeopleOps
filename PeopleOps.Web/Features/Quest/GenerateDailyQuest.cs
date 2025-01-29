@@ -5,7 +5,7 @@ public static class GenerateDailyQuest
     //query to generate daily quest
     public class Command : IRequest<bool>
     {
-        public Guid userid { get; set; }
+        public int ProfileId { get; set; }
     }
 
     // handler to generate daily quest
@@ -14,10 +14,9 @@ public static class GenerateDailyQuest
         public async Task<bool> Handle(Command request, CancellationToken cancellationToken)
         {
             var baseResponse = await supabaseClient.Rpc("generate_daily_quest",
-                new {request.userid, quest_date = DateOnly.FromDateTime(DateTime.Now)})
+                    new { profileid = request.ProfileId, quest_date = DateOnly.FromDateTime(DateTime.Now) })
                 .ConfigureAwait(false);
             return baseResponse.ResponseMessage!.IsSuccessStatusCode;
         }
     }
-    
 }

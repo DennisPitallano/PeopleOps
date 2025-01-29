@@ -9,7 +9,7 @@ public static class GetCompletedQuest
     //query to get completed quest
     public class Query : IRequest<List<QuestTableResponse>>
     {
-        public Guid UserId { get; set; }
+        public int ProfileId { get; set; }
     }
 
     // handler to get completed quest
@@ -19,9 +19,9 @@ public static class GetCompletedQuest
         {
             List<QuestTableResponse> completedQuests = [];
             var baseResponse = await supabaseClient.Rpc("get_completed_quests",
-                new {userid = request.UserId})
+                    new { profileid = request.ProfileId })
                 .ConfigureAwait(false);
-            
+
             if (baseResponse.ResponseMessage is { IsSuccessStatusCode: true })
             {
                 completedQuests = JsonSerializer.Deserialize<List<QuestTableResponse>>(baseResponse.Content!,
@@ -33,7 +33,6 @@ public static class GetCompletedQuest
             }
 
             return completedQuests;
-
         }
     }
 }

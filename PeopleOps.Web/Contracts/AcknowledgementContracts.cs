@@ -6,14 +6,14 @@ namespace PeopleOps.Web.Contracts;
 public class AcknowledgementRequest
 {
     [Required (ErrorMessage = "Sender is required")]
-    public Guid SenderId { get; set; }
+    public int SenderId { get; set; }
     [Required (ErrorMessage = "Receiver is required")]
-    public Guid ReceiverId { get; set; }
+    public int ReceiverId { get; set; }
     
     [Required (ErrorMessage = "Receiver list is required")]
     // should be greater than 0
     [MinLength(1, ErrorMessage = "Receiver list should be greater than 0")]
-    public List<Guid> ReceiverList { get; set; } = new();
+    public List<int> ReceiverList { get; set; } = new();
     public DateTime AcknowledgmentDate { get; set; }
     [Required (ErrorMessage = "Message is required")]
     public string Message { get; set; }
@@ -39,7 +39,7 @@ public class AcknowledgementResponse
     [JsonPropertyName("created_at")]
     public DateTime CreatedAt { get; set; }
     [JsonPropertyName("sender_id")]
-    public Guid SenderId { get; set; }
+    public int SenderId { get; set; }
     [JsonPropertyName("acknowledgment_date")]
     public DateTime AcknowledgmentDate { get; set; }
     [JsonPropertyName("message")]

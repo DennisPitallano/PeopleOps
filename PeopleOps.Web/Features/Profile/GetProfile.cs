@@ -9,7 +9,7 @@ public static class GetProfile
 
     public class Query : IRequest<ProfileResponse>
     {
-        public Guid Id { get; set; }
+        public int Id { get; set; }
     }
 
     // handler to get profile
@@ -17,7 +17,7 @@ public static class GetProfile
     {
         public async Task<ProfileResponse> Handle(Query request, CancellationToken cancellationToken)
         {
-            var profiles = await supabaseClient.From<UserTable>()
+            var profiles = await supabaseClient.From<ProfileTable>()
                 .Where(p => p.Id == request.Id)
                 .Get(cancellationToken).ConfigureAwait(false);
             var profile = profiles.Models.Single();
@@ -25,7 +25,7 @@ public static class GetProfile
             return new ProfileResponse
             {
                 Id = profile.Id,
-                UpdatedAt = profile.CreatedAt,
+                UpdatedAt = profile.UpdatedAt,
                 FirstName = profile.FirstName,
                 LastName = profile.LastName,
                 DateOfBirth = profile.DateOfBirth,

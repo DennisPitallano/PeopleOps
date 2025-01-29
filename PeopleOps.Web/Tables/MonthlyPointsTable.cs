@@ -21,8 +21,8 @@ public class MonthlyPointsTable : BaseModel
     [Column("points_spent")] 
     public int PointsSpent { get; set; }
 
-    [Column("user_id")] 
-    public Guid UserId { get; set; }
+    [Column("profile_id")] 
+    public int ProfileId { get; set; }
     
     [Column("is_revoke")]
     public bool IsRevoke { get; set; }

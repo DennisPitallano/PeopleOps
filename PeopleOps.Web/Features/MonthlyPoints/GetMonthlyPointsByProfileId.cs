@@ -3,11 +3,11 @@ using PeopleOps.Web.Tables;
 
 namespace PeopleOps.Web.Features.MonthlyPoints;
 
-public static class GetMonthlyPointsByUserId
+public static class GetMonthlyPointsByProfileId
 {
     public class Query : IRequest<MonthlyPointsResponse>
     {
-        public Guid UserId { get; set; }
+        public int ProfileId { get; set; }
     }
 
     internal sealed class Handler(Client supabaseClient) : IRequestHandler<Query, MonthlyPointsResponse>
@@ -16,7 +16,7 @@ public static class GetMonthlyPointsByUserId
         {
             var response = await supabaseClient
                 .From<MonthlyPointsTable>()
-                .Where(p => p.UserId == request.UserId)
+                .Where(p => p.ProfileId == request.ProfileId)
                 .Single(cancellationToken: cancellationToken);
 
             return new MonthlyPointsResponse
@@ -26,7 +26,7 @@ public static class GetMonthlyPointsByUserId
                 MonthYear = response.MonthYear,
                 PointsAllocated = response.PointsAllocated,
                 PointsSpent = response.PointsSpent,
-                UserId = response.UserId,
+                ProfileId = response.ProfileId,
                 IsRevoke = response.IsRevoke
             };
         }

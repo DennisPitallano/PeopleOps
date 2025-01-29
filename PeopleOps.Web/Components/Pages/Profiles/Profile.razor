@@ -333,7 +333,7 @@
                  
                     </FluentGrid>
                 </FluentTab>
-                <FluentTab Label="Teams" Id="tab-2" DeferredLoading="@DeferredLoading">
+                <FluentTab Label="Teams" Id="tab-2" DeferredLoading="true">
                     <LoadingContent>
                         <FluentProgressRing/>
                     </LoadingContent>
@@ -348,7 +348,7 @@
                             </FluentToolbar>
                         </div>
                         <FluentGrid Spacing="3" Justify="JustifyContent.FlexStart" AdaptiveRendering="true">
-                            @foreach (var user in Users)
+                            @foreach (var user in Profiles)
                             {
                                 <FluentGridItem xs="6" sm="3" Justify="JustifyContent.Center" AdaptiveRendering="true">
                                     <FluentCard Class="card-shadow card-radius"
@@ -376,7 +376,7 @@
                         </FluentGrid>
                     </Content>
                 </FluentTab>
-                <FluentTab Label="Activity" Id="tab-3" DeferredLoading="@DeferredLoading">
+                <FluentTab Label="Activity" Id="tab-3" DeferredLoading="true">
                     <FluentGridItem xs="12" sm="8">
                         <FluentCard MinimalStyle="true"
                                     Style="padding:0.5rem; box-shadow: 0px 3px 4px 0px rgba(0, 0, 0, .03) !important;border-radius: .75rem !important; border: 1px solid  #f1f1f4; !important;" Class="p-card">
