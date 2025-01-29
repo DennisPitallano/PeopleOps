@@ -1,35 +1,36 @@
 ﻿using System.Text.Json;
 using System.Text.Json.Serialization;
 using PeopleOps.Web.Contracts;
-using PeopleOps.Web.Tables;
 
 namespace PeopleOps.Web.Features.User;
 
 public static class GetAllUsersExcept
 {
-    public class Query : IRequest<List<UserResponse>>
+    public class Query : IRequest<List<ProfileResponse>>
     {
-        public Guid userid { get; set; }
+        public int ProfileId { get; set; }
     }
 
-    internal sealed class Handler(Client supabaseClient) : IRequestHandler<Query, List<UserResponse>>
+    internal sealed class Handler(Client supabaseClient) : IRequestHandler<Query, List<ProfileResponse>>
     {
-        public async Task<List<UserResponse>> Handle(Query request, CancellationToken cancellationToken)
+        public async Task<List<ProfileResponse>> Handle(Query request, CancellationToken cancellationToken)
         {
-            List<UserResponse> users = [];
-            var baseResponse = await supabaseClient.Rpc("get_all_users_except", new { request.userid })
-                .ConfigureAwait(false);
-            
-            if (baseResponse.ResponseMessage is { IsSuccessStatusCode: true })
-            {
-                users = JsonSerializer.Deserialize<List<UserResponse>>(baseResponse.Content,
+            List<ProfileResponse> profiles = [];
+            var baseResponse = await supabaseClient.Rpc("get_all_profiles_except",
+                new
+                {
+                    profileid = request.ProfileId
+                }
+            ).ConfigureAwait(false);
+
+            if (baseResponse is { ResponseMessage: { IsSuccessStatusCode: true }, Content: not null })
+                profiles = JsonSerializer.Deserialize<List<ProfileResponse>>(baseResponse.Content,
                     new JsonSerializerOptions
                     {
                         PropertyNameCaseInsensitive = true,
                         Converters = { new JsonStringEnumConverter() }
                     }) ?? [];
-            }
-            return users;
+            return profiles;
         }
     }
 }

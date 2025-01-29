@@ -10,8 +10,8 @@ public class AttendanceTableResponse
     [JsonPropertyName("created_at")]
     public DateTime? CreatedAt { get; set; }
     
-    [JsonPropertyName("user_id")]
-    public Guid UserId { get; set; }
+    [JsonPropertyName("profile_id")]
+    public int ProfileId { get; set; }
     
     [JsonPropertyName("login_time")]
     public DateTime? TimeIn { get; set; }

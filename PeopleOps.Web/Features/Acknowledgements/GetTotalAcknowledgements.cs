@@ -7,16 +7,16 @@ public static class GetTotalAcknowledgements
 {
     public class Query : IRequest<int>
     {
-        public Guid ReceiverId { get; set; }
+        public int ReceiverId { get; set; }
     }
 
     internal sealed class Handler(Client supabaseClient) : IRequestHandler<Query, int>
     {
         public async Task<int> Handle(Query request, CancellationToken cancellationToken)
         {
-            var receiverid = request.ReceiverId;
+            var profileid  = request.ReceiverId;
             var baseResponse = await supabaseClient.Rpc("get_total_acknowledgements_points",
-                    new { receiverid})
+                    new { profileid })
                 .ConfigureAwait(false);
 
             if (baseResponse is { ResponseMessage: { IsSuccessStatusCode: true }, Content: not null })

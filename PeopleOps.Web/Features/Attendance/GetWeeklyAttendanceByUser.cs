@@ -11,7 +11,7 @@ public static class GetWeeklyAttendanceByUser
 
     public class Query : IRequest<List<AttendanceTableResponse>>
     {
-        public Guid userid { get; set; }
+        public int ProfileId { get; set; }
     }
 
     // handler to get attendance by profile
@@ -25,9 +25,9 @@ public static class GetWeeklyAttendanceByUser
             var monday = DateTime.Today.StartOfWeek(DayOfWeek.Monday);
             var start_date =DateOnly.FromDateTime(DateTime.Today.StartOfWeek(DayOfWeek.Monday));
             var end_date = DateOnly.FromDateTime(monday.AddDays(4));
-            
+            var profileid = request.ProfileId;
             var baseResponse = await supabaseClient.Rpc("get_working_days",
-                new {end_date,start_date,request.userid})
+                new {end_date,profileid,start_date})
                 .ConfigureAwait(false);
            //convert the response to a list of dates
            if (baseResponse.ResponseMessage is { IsSuccessStatusCode: true })

@@ -27,7 +27,7 @@ public static class GetAttendance
                 Id = attendance.Id,
                 CreatedAt = attendance.CreatedAt,
                 ActivityDate = attendance.ActivityDate,
-                UserId = attendance.UserId,
+                ProfileId = attendance.ProfileId,
                 TimeIn = attendance.TimeIn,
                 TimeOut = attendance.TimeOut
             };

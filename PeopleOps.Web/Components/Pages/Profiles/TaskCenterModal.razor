@@ -2,13 +2,10 @@
 @using PeopleOps.Web.Contracts
 @using PeopleOps.Web.Features.Attendance
 @using PeopleOps.Web.Features.Quest
-@using Client = Supabase.Client
-@using Supabase.Gotrue
 @implements IDialogContentComponent<PeopleOps.Web.Contracts.ProfileResponse>
 @inject ISender Sender
 @inject IDialogService DialogService
 @rendermode InteractiveServer
-@inject Client Supabase
 
 @code {
     [CascadingParameter] public FluentDialog? Dialog { get; set; }
@@ -29,17 +26,14 @@
     private List<QuestTableResponse> MonthlyMainQuests { get; set; } = [];
     private List<QuestTableResponse> MonthlySideQuests { get; set; } = [];
 
-    User? _user = new();
-
     string? _activeTabId = "tab-attendance";
     bool _isLoading;
 
     protected override async Task<Task> OnInitializedAsync()
     {
         _isLoading = true;
-        _user = Supabase.Auth.CurrentUser;
         //get the attendance of the user
-        AttendanceResponses = await Sender.Send(new GetWeeklyAttendanceByUser.Query { userid = Content.Id });
+        AttendanceResponses = await Sender.Send(new GetWeeklyAttendanceByUser.Query { ProfileId = Content.Id });
 
         await LoadDailyQuests();
         // load weekly quests
@@ -62,19 +56,19 @@
     private async Task InitializeWeeklyAttendance()
     {
         //generate the weekly attendance
-        var isGenerated = await Sender.Send(new GenerateWeeklyAttendanceByUser.Command { userid = Content.Id });
+        var isGenerated = await Sender.Send(new GenerateWeeklyAttendanceByUser.Command { ProfileId = Content.Id });
 
         if (isGenerated)
         {
             //refresh the attendance
-            AttendanceResponses = await Sender.Send(new GetWeeklyAttendanceByUser.Query { userid = Content.Id });
+            AttendanceResponses = await Sender.Send(new GetWeeklyAttendanceByUser.Query { ProfileId = Content.Id });
         }
     }
 
     private async Task LoadDailyQuests()
     {
         //get daily quests
-        DailyQuestResponses = await Sender.Send(new GetDailyQuestsByUser.Query { userid = Content.Id, questgroup = "daily" });
+        DailyQuestResponses = await Sender.Send(new GetDailyQuestsByUser.Query { ProfileId = Content.Id, QuestGroup = "daily" });
 
         //main quests
         DailyMainQuests = DailyQuestResponses.Where(x => x.IsMainQuest).ToList();
@@ -85,7 +79,7 @@
     private async Task LoadWeeklyQuests()
     {
         //get weekly quests
-        WeeklyQuestResponses = await Sender.Send(new GetWeeklyQuestsByUser.Query { userid = Content.Id, questgroup = "weekly" });
+        WeeklyQuestResponses = await Sender.Send(new GetWeeklyQuestsByUser.Query { ProfileId = Content.Id });
 
         //main quests
         WeeklyMainQuests = WeeklyQuestResponses.Where(x => x.IsMainQuest).ToList();
@@ -96,7 +90,7 @@
     private async Task LoadMonthlyQuests()
     {
         //get monthly quests
-        MonthlyQuestResponses = await Sender.Send(new GetMonthlyQuestsByUser.Query { userid = Content.Id, questgroup = "monthly" });
+        MonthlyQuestResponses = await Sender.Send(new GetMonthlyQuestsByUser.Query { ProfileId = Content.Id });
 
         //main quests
         MonthlyMainQuests = MonthlyQuestResponses.Where(x => x.IsMainQuest).ToList();
@@ -108,7 +102,7 @@
     private async Task InitializeDailyQuests()
     {
         //get daily quests
-        var isGenerated = await Sender.Send(new GenerateDailyQuest.Command { userid = Content.Id });
+        var isGenerated = await Sender.Send(new GenerateDailyQuest.Command { ProfileId = Content.Id });
 
         if (isGenerated)
         {
@@ -122,7 +116,7 @@
     private async Task InitializeWeeklyQuests()
     {
         //get weekly quests
-        var isGenerated = await Sender.Send(new GenerateWeeklyQuest.Command { userid = Content.Id });
+        var isGenerated = await Sender.Send(new GenerateWeeklyQuest.Command { ProfileId = Content.Id });
 
         if (isGenerated)
         {
@@ -136,7 +130,7 @@
     private async Task InitializeMonthlyQuests()
     {
         //get monthly quests
-        var isGenerated = await Sender.Send(new GenerateMonthlyQuest.Command { UserId = Content.Id });
+        var isGenerated = await Sender.Send(new GenerateMonthlyQuest.Command { ProfileId = Content.Id });
 
         if (isGenerated)
         {
@@ -184,7 +178,7 @@
 
         _isLoading = false;
 
-        var dialog = await ShowSuccessMessageBox();
+        await ShowSuccessMessageBox();
         StateHasChanged();
     }
 
@@ -212,8 +206,8 @@
     {
         await Sender.Send(new SignOutAttendance.Command { Id = attendanceId });
         //refresh the attendance
-        AttendanceResponses = await Sender.Send(new GetWeeklyAttendanceByUser.Query { userid = Content.Id });
-        var dialog = await ShowSuccessMessageBox();
+        AttendanceResponses = await Sender.Send(new GetWeeklyAttendanceByUser.Query { ProfileId = Content.Id });
+        await ShowSuccessMessageBox();
         StateHasChanged();
     }
 
@@ -222,16 +216,16 @@
     {
         await Sender.Send(new SignInAttendance.Command { Id = attendanceId });
         //refresh the attendance
-        AttendanceResponses = await Sender.Send(new GetWeeklyAttendanceByUser.Query { userid = Content.Id });
+        AttendanceResponses = await Sender.Send(new GetWeeklyAttendanceByUser.Query { ProfileId = Content.Id });
 
         //show message box that the user has signed in successfully with conffeti emoji
-        var dialog = await ShowSuccessMessageBox();
+        await ShowSuccessMessageBox();
         StateHasChanged();
     }
 
-    private async Task<IDialogReference> ShowSuccessMessageBox()
+    private async Task ShowSuccessMessageBox()
     {
-        return await DialogService.ShowMessageBoxAsync(new DialogParameters<MessageBoxContent>()
+        await DialogService.ShowMessageBoxAsync(new DialogParameters<MessageBoxContent>()
         {
             Content = new MessageBoxContent
             {

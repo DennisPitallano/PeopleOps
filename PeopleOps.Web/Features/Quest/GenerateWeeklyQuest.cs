@@ -5,7 +5,7 @@ public static class GenerateWeeklyQuest
     //query to generate week quest
     public class Command : IRequest<bool>
     {
-        public Guid userid { get; set; }
+        public int ProfileId { get; set; }
     }
 
     // handler to generate week quest
@@ -15,10 +15,9 @@ public static class GenerateWeeklyQuest
         {
             var quest_date = DateOnly.FromDateTime(DateTime.Now);
             var baseResponse = await supabaseClient.Rpc("generate_weekly_quest",
-                new {quest_date,request.userid})
+                    new { profileid = request.ProfileId,quest_date })
                 .ConfigureAwait(false);
             return baseResponse.ResponseMessage!.IsSuccessStatusCode;
         }
     }
-    
 }

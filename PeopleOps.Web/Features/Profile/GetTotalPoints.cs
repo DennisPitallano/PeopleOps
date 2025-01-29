@@ -5,14 +5,16 @@ public static class GetTotalPoints
     
     public class Query : IRequest<int>
     {
-        public Guid userid { get; set; }
+        public int ProfileId { get; set; }
     }
 
     internal sealed class Handler(Client supabaseClient) : IRequestHandler<Query, int>
     {
         public async Task<int> Handle(Query request, CancellationToken cancellationToken)
-        { 
-            var totalPoints = await supabaseClient.Rpc<int>("calculate_user_total_points", new { request.userid }).ConfigureAwait(false);
+        {
+            var profileid = request.ProfileId;
+            var totalPoints = await supabaseClient.Rpc<int>("calculate_user_total_points",
+                new { profileid }).ConfigureAwait(false);
             return totalPoints;
         }
     }

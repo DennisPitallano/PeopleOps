@@ -17,7 +17,7 @@ public static class UpdateProfile
         public async Task<ProfileResponse> Handle(Command request, CancellationToken cancellationToken)
         {
             var profile = request.ProfileRequest;
-            var profiles = await supabaseClient.From<UserTable>()
+            var profiles = await supabaseClient.From<ProfileTable>()
                 .Where(p => p.Id == profile.Id)
                 .Set(p => p.FirstName, profile.FirstName)
                 .Set(p => p.LastName, profile.LastName)
@@ -37,7 +37,12 @@ public static class UpdateProfile
                 Email = updatedProfile.Email,
                 CityAddress = updatedProfile.CityAddress,
                 JobTitle = updatedProfile.JobTitle,
-                Gender = updatedProfile.Gender
+                Gender = updatedProfile.Gender,
+                Auth0UserId = updatedProfile.Auth0UserId,
+                AvatarUrl = updatedProfile.AvatarUrl,
+                FullName = updatedProfile.FullName,
+                UserName = updatedProfile.UserName,
+                UpdatedAt = updatedProfile.UpdatedAt
             };
         }
     }

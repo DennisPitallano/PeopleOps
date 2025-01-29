@@ -29,7 +29,7 @@ public static class SignOutAttendance
                 Id = updatedAttendance.Id,
                 CreatedAt = updatedAttendance.CreatedAt,
                 ActivityDate = updatedAttendance.ActivityDate,
-                UserId = updatedAttendance.UserId,
+                ProfileId = updatedAttendance.ProfileId,
                 TimeIn = updatedAttendance.TimeIn,
                 TimeOut = updatedAttendance.TimeOut
             };

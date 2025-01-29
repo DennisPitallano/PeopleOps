@@ -87,102 +87,114 @@
                     </FluentCounterBadge>
                 </div>
                 <FluentTab Label="Home" Icon="@(new Icons.Regular.Size32.Home())" Id="tab-1">
-                    <FluentCard MinimalStyle="true"
-                                Style="margin-top:1.5em; box-shadow: 0px 3px 4px 0px rgba(0, 0, 0, .03) !important;border-radius: .75rem !important; border: 1px solid  #f1f1f4; !important;">
+                    <FluentCard
+                                Style="margin-top:1.5em; box-shadow: 0 3px 4px 0 rgba(0, 0, 0, .03) !important;border-radius: .75rem !important; border: 1px solid  #f1f1f4; !important;">
                         <FluentStack Orientation="Orientation.Horizontal"
                                      HorizontalAlignment="HorizontalAlignment.Center"
                                      VerticalAlignment="VerticalAlignment.Center"
                                      HorizontalGap="15" VerticalGap="2"
                                      Style="">
-                            <FluentGrid Spacing="2" Justify="JustifyContent.SpaceEvenly"
-                                        Style="padding-left: 10px; padding-right: 10px;">
-                                <FluentGridItem xs="3" Justify="JustifyContent.Center">
-                                    <img alt="" width="40" class="h-10 max-w-full"
-                                         src="/assets/media/images/gamer-coin.svg">
-                                </FluentGridItem>
-                                <FluentGridItem xs="9">
-                                    <FluentLabel Typo="Typography.H2">100</FluentLabel>
-                                    <FluentLabel Color="Color.Custom" CustomColor="grey" Style="font-weight:500;">
-                                        Available Coins
-                                    </FluentLabel>
-                                </FluentGridItem>
-                            </FluentGrid>
-                            <FluentSpacer/>
-                            <FluentDivider Style="height: 50px;" Role="DividerRole.Presentation"
-                                           Orientation="Orientation.Vertical"></FluentDivider>
-                            <FluentGrid Spacing="2" Justify="JustifyContent.SpaceEvenly"
-                                        Style="padding-left: 10px; padding-right: 10px;">
-                                <FluentGridItem xs="3" Justify="JustifyContent.Center">
-                                    <img alt="" width="40" class="h-10 max-w-full"
-                                         src="/assets/media/images/gamer-coin.svg">
-                                </FluentGridItem>
-                                <FluentGridItem xs="9">
-                                    <FluentLabel Typo="Typography.H2">
-                                        @if (IsLoadingData)
-                                        {
-                                            <FluentProgressRing Width="22px" Stroke="ProgressStroke.Small"/>
-                                        }
-                                        else
-                                        {
-                                            @TotalLedgerPointsBalance
-                                        }
-                                    </FluentLabel>
-                                    <FluentLabel Color="Color.Custom" CustomColor="grey" Style="font-weight:500;">
-                                       Redeemable Coins
-                                    </FluentLabel>
-                                </FluentGridItem>
-                            </FluentGrid>
-                            <FluentSpacer/>
-                            <FluentDivider Style="height: 50px;" Role="DividerRole.Presentation"
-                                           Orientation="Orientation.Vertical"></FluentDivider>
-                            <FluentGrid Spacing="2" Style="padding-left: 10px; padding-right: 10px;">
-                                <FluentGridItem xs="3" Justify="JustifyContent.Center">
-                                    <img alt="" width="40" class="h-10 max-w-full"
-                                         src="/assets/media/images/gamer-diamond.svg">
-                                </FluentGridItem>
-                                <FluentGridItem xs="9">
-                                    <FluentLabel Typo="Typography.H2">
-                                        @if (IsLoadingData)
-                                        {
-                                            <FluentProgressRing Width="22px" Stroke="ProgressStroke.Small"/>
-                                        }
-                                        else
-                                        {
-                                            @TotalCompletedQuests
-                                        }
-                                    </FluentLabel>
-                                    <FluentLabel Color="Color.Custom" CustomColor="grey" Style="font-weight:500;">Quests
-                                        Completed
-                                    </FluentLabel>
-                                </FluentGridItem>
-                            </FluentGrid>
-                            <FluentSpacer/>
-                            <FluentDivider Style="height: 50px;" Role="DividerRole.Presentation"
-                                           Orientation="Orientation.Vertical"></FluentDivider>
-                            <FluentGrid Spacing="2" Style="padding-left: 10px; padding-right: 10px;">
-                                <FluentGridItem xs="6" Justify="JustifyContent.Center">
-                                    <img alt="" width="40" class="h-10 max-w-full"
-                                         src="/assets/media/images/gamer-trophy.svg">
-                                </FluentGridItem>
-                                <FluentGridItem xs="6">
-                                    <FluentLabel Typo="Typography.H2">
-                                        @if (IsLoadingData)
-                                        {
-                                            <FluentProgressRing Width="22px" Stroke="ProgressStroke.Small"/>
-                                        }
-                                        else
-                                        {
-                                            @TotalTrophies
-                                        }
-                                    </FluentLabel>
-                                    <FluentLabel Color="Color.Custom" CustomColor="grey" Style="font-weight:500;">
-                                        Trophies
-                                    </FluentLabel>
-                                </FluentGridItem>
-                            </FluentGrid>
+                            <FluentHorizontalScroll Speed="600" View="HorizontalScrollView.Mobile" Easing=ScrollEasing.EaseInOut>
+                                <FluentGrid Spacing="2" Justify="JustifyContent.SpaceEvenly"
+                                            Style="padding-left: 10px; padding-right: 10px;">
+                                    <FluentGridItem xs="12" md="3" Justify="JustifyContent.Center">
+                                        <img alt="" width="40" class="h-10 max-w-full"
+                                             src="/assets/media/images/gamer-coin.svg">
+                                    </FluentGridItem>
+                                    <FluentGridItem xs="12" md="9">
+                                        <FluentLabel Typo="Typography.H2">
+                                            @if (IsLoadingData)
+                                            {
+                                                <FluentProgressRing Width="22px" Stroke="ProgressStroke.Small"/>
+                                            }
+                                            else
+                                            {
+                                                @MonthlyPoints.AvailableCoins
+                                            }
+                                        </FluentLabel>
+                                        <FluentLabel Color="Color.Custom" CustomColor="grey" Style="font-weight:500;">
+                                            Available Coins
+                                        </FluentLabel>
+                                    </FluentGridItem>
+                                </FluentGrid>
+                                <FluentSpacer/>
+                                <FluentDivider Style="height: 50px;" Role="DividerRole.Presentation"
+                                               Orientation="Orientation.Vertical"></FluentDivider>
+                                <FluentGrid Spacing="2" Justify="JustifyContent.SpaceEvenly"
+                                            Style="padding-left: 10px; padding-right: 10px;">
+                                    <FluentGridItem xs="12" md="3" Justify="JustifyContent.Center">
+                                        <img alt="" width="40" class="h-10 max-w-full"
+                                             src="/assets/media/images/gamer-coin.svg">
+                                    </FluentGridItem>
+                                    <FluentGridItem xs="12" md="9">
+                                        <FluentLabel Typo="Typography.H2">
+                                            @if (IsLoadingData)
+                                            {
+                                                <FluentProgressRing Width="22px" Stroke="ProgressStroke.Small"/>
+                                            }
+                                            else
+                                            {
+                                                @TotalLedgerPointsBalance
+                                            }
+                                        </FluentLabel>
+                                        <FluentLabel Color="Color.Custom" CustomColor="grey" Style="font-weight:500;">
+                                            Redeemable Coins
+                                        </FluentLabel>
+                                    </FluentGridItem>
+                                </FluentGrid>
+                                <FluentSpacer/>
+                                <FluentDivider Style="height: 50px;" Role="DividerRole.Presentation"
+                                               Orientation="Orientation.Vertical"></FluentDivider>
+                                <FluentGrid Spacing="2" Style="padding-left: 10px; padding-right: 10px;">
+                                    <FluentGridItem md="3" xs="12" Justify="JustifyContent.Center">
+                                        <img alt="" width="40" class="h-10 max-w-full"
+                                             src="/assets/media/images/gamer-diamond.svg">
+                                    </FluentGridItem>
+                                    <FluentGridItem md="9" xs="12">
+                                        <FluentLabel Typo="Typography.H2">
+                                            @if (IsLoadingData)
+                                            {
+                                                <FluentProgressRing Width="22px" Stroke="ProgressStroke.Small"/>
+                                            }
+                                            else
+                                            {
+                                                @TotalCompletedQuests
+                                            }
+                                        </FluentLabel>
+                                        <FluentLabel Color="Color.Custom" CustomColor="grey" Style="font-weight:500;">
+                                            Quests
+                                            Completed
+                                        </FluentLabel>
+                                    </FluentGridItem>
+                                </FluentGrid>
+                                <FluentSpacer/>
+                                <FluentDivider Style="height: 50px;" Role="DividerRole.Presentation"
+                                               Orientation="Orientation.Vertical"></FluentDivider>
+                                <FluentGrid Spacing="2" Style="padding-left: 10px; padding-right: 10px;">
+                                    <FluentGridItem xs="12" md="3" Justify="JustifyContent.Center">
+                                        <img alt="" width="40" class="h-10 max-w-full"
+                                             src="/assets/media/images/gamer-trophy.svg">
+                                    </FluentGridItem>
+                                    <FluentGridItem xs="12" md="9">
+                                        <FluentLabel Typo="Typography.H2">
+                                            @if (IsLoadingData)
+                                            {
+                                                <FluentProgressRing Width="22px" Stroke="ProgressStroke.Small"/>
+                                            }
+                                            else
+                                            {
+                                                @TotalTrophies
+                                            }
+                                        </FluentLabel>
+                                        <FluentLabel Color="Color.Custom" CustomColor="grey" Style="font-weight:500;">
+                                            Trophies
+                                        </FluentLabel>
+                                    </FluentGridItem>
+                                </FluentGrid>
+                            </FluentHorizontalScroll>
                         </FluentStack>
                     </FluentCard>
- 
+
                     <FluentGrid Spacing="3" Style="margin-top:2rem;" Justify="JustifyContent.FlexStart">
                         <FluentGridItem xs="3" sm="4" HiddenWhen="GridItemHidden.SmAndDown">
                             <FluentStack Orientation="Orientation.Vertical" VerticalAlignment="VerticalAlignment.Center"
@@ -330,10 +342,10 @@
                         <FluentGridItem xs="8">
                             <Feeds></Feeds>
                         </FluentGridItem>
-                 
+
                     </FluentGrid>
                 </FluentTab>
-                <FluentTab Label="Teams" Id="tab-2" DeferredLoading="@DeferredLoading">
+                <FluentTab Label="Teams" Id="tab-2" DeferredLoading="true">
                     <LoadingContent>
                         <FluentProgressRing/>
                     </LoadingContent>
@@ -348,7 +360,7 @@
                             </FluentToolbar>
                         </div>
                         <FluentGrid Spacing="3" Justify="JustifyContent.FlexStart" AdaptiveRendering="true">
-                            @foreach (var user in Users)
+                            @foreach (var user in Profiles)
                             {
                                 <FluentGridItem xs="6" sm="3" Justify="JustifyContent.Center" AdaptiveRendering="true">
                                     <FluentCard Class="card-shadow card-radius"
@@ -376,10 +388,11 @@
                         </FluentGrid>
                     </Content>
                 </FluentTab>
-                <FluentTab Label="Activity" Id="tab-3" DeferredLoading="@DeferredLoading">
+                <FluentTab Label="Activity" Id="tab-3" DeferredLoading="true">
                     <FluentGridItem xs="12" sm="8">
                         <FluentCard MinimalStyle="true"
-                                    Style="padding:0.5rem; box-shadow: 0px 3px 4px 0px rgba(0, 0, 0, .03) !important;border-radius: .75rem !important; border: 1px solid  #f1f1f4; !important;" Class="p-card">
+                                    Style="padding:0.5rem; box-shadow: 0px 3px 4px 0px rgba(0, 0, 0, .03) !important;border-radius: .75rem !important; border: 1px solid  #f1f1f4; !important;"
+                                    Class="p-card">
                             @if (IsLoadingData)
                             {
                                 <FluentProgressRing Width="22px" Stroke="ProgressStroke.Small"/>

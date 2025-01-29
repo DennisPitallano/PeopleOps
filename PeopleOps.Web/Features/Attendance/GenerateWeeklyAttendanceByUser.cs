@@ -8,7 +8,7 @@ public static class GenerateWeeklyAttendanceByUser
     //query to generate weekly attendance
     public class Command : IRequest<bool>
     {
-        public Guid userid { get; set; }
+        public int ProfileId { get; set; }
     }
 
     // handler to generate weekly attendance
@@ -24,7 +24,7 @@ public static class GenerateWeeklyAttendanceByUser
                 var activityDate = startOfWeek.AddDays(i);
                 var attendanceTable = new AttendanceTable
                 {
-                    UserId = request.userid,
+                    ProfileId = request.ProfileId,
                     ActivityDate = DateOnly.FromDateTime(activityDate),
                     CreatedAt = DateTimeOffset.UtcNow.DateTime,
                 };

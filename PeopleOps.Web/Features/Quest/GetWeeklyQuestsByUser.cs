@@ -11,8 +11,7 @@ public static class GetWeeklyQuestsByUser
     //query to get weekly quests
     public class Query : IRequest<List<QuestTableResponse>>
     {
-        public Guid userid { get; set; }
-        public string questgroup { get; set; }
+        public int ProfileId { get; set; }
     }
 
     // handler to get weekly quests
@@ -29,8 +28,14 @@ public static class GetWeeklyQuestsByUser
             // call the get_weekly_quests rpc
 
             var baseResponse = await supabaseClient.Rpc("get_weekly_quests",
-                    new { end_date, start_date, request.userid })
+                    new
+                    {
+                        end_date,
+                        profileid = request.ProfileId,
+                        start_date
+                    })
                 .ConfigureAwait(false);
+            
             //convert the response to a list of weekly quests quest_date, questgroup, userid
             if (baseResponse.ResponseMessage is { IsSuccessStatusCode: true })
             {

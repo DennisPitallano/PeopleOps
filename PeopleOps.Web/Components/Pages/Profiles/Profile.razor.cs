@@ -1,65 +1,96 @@
-﻿using Microsoft.AspNetCore.Components;
+﻿using System.Security.Claims;
+using Microsoft.AspNetCore.Components;
 using PeopleOps.Web.Contracts;
 using PeopleOps.Web.Features.Acknowledgements;
 using PeopleOps.Web.Features.Attendance;
+using PeopleOps.Web.Features.MonthlyPoints;
 using PeopleOps.Web.Features.Profile;
 using PeopleOps.Web.Features.Quest;
 using PeopleOps.Web.Features.Tags;
 using PeopleOps.Web.Features.User;
-using Supabase.Gotrue;
 using Client = Supabase.Client;
 
 namespace PeopleOps.Web.Components.Pages.Profiles;
 
 public partial class Profile : ComponentBase
 {
-    [Inject] private ISender Sender { get; set; }
+    #region Parameters
 
-    [Inject] private IDialogService DialogService { get; set; }
+    [CascadingParameter] private Task<AuthenticationState>? AuthenticationState { get; set; }
+
+    #endregion
+
+    #region Dependencies
+
+    [Inject] private ISender Sender { get; set; } = null!;
+    [Inject] private IDialogService DialogService { get; set; } = null!;
+    [Inject] public Client Supabase { get; set; } = null!;
+    [Inject] public AuthenticationStateProvider AuthenticationStateProvider { get; set; } = null!;
+
+    #endregion
+
+    #region Properties
+
     private ProfileResponse ProfileResponse { get; set; } = new();
-
-    [Inject] public Client Supabase { get; set; }
-    [Inject] public AuthenticationStateProvider AuthenticationStateProvider { get; set; }
-
     private List<QuestTableResponse> CompletedQuests { get; set; } = [];
 
     private List<AttendanceTableResponse> AttendanceActivities { get; set; } = [];
-    
-    private List<UserResponse> Users { get; set; } = [];
+
+    private List<ProfileResponse> Profiles { get; set; } = [];
 
     private long TotalLedgerPointsBalance { get; set; }
     private int TotalCompletedQuests { get; set; }
     private int TotalTrophies { get; set; }
     private bool IsLoadingData { get; set; }
+    
+    private MonthlyPointsResponse? MonthlyPoints { get; set; }
+    
+    #endregion
 
-    bool DeferredLoading = false;
-    private bool _modal = true;
-    User? User { get; set; }
-    string? UserGuid { get; set; }
     protected override async Task OnInitializedAsync()
     {
         IsLoadingData = true;
-       // User = Supabase.Auth.CurrentUser;
-        var state = await AuthenticationStateProvider.GetAuthenticationStateAsync();
-        UserGuid = "58b0c833-ee77-4230-8b43-0e59f6fb0541"; //state.User.Claims.FirstOrDefault(c => c.Type == "sub")?.Value;
-        // send get query profile
-        var query = new GetProfile.Query { Id = Guid.Parse(UserGuid) };
 
-        TotalLedgerPointsBalance = await GetTotalPoints();
-        TotalCompletedQuests = await GetTotalCompletedQuests(); 
-        TotalTrophies = await GetTotalTrophies();
-        ProfileResponse = await Sender.Send(query);
+        if (AuthenticationState != null)
+        {
+            var state = await AuthenticationState;
+            var profileRequest = SetProfileRequest(state);
+            // get or create profile
+            var query = new GetOrCreateProfile.Command { ProfileRequest = profileRequest };
+            ProfileResponse = await Sender.Send(query);
 
-        await LoadCompletedQuests();
-        await LoadWeeklyAttendance();
-        Users = await GetAllUsersExcept();
+            await GetExpendableCoins();
+            TotalLedgerPointsBalance = await GetTotalPoints();
+            TotalCompletedQuests = await GetTotalCompletedQuests();
+            TotalTrophies = await GetTotalTrophies();
+
+            await LoadCompletedQuests();
+            await LoadWeeklyAttendance();
+            Profiles = await GetAllProfilesExcept();
+        }
+
         IsLoadingData = false;
+    }
+
+    private ProfileRequest SetProfileRequest(AuthenticationState authenticationState)
+    {
+        return new ProfileRequest
+        {
+            Auth0UserId = authenticationState.User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)
+                ?.Value,
+            FirstName = authenticationState.User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.GivenName)?.Value,
+            LastName = authenticationState.User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Surname)?.Value,
+            Email = authenticationState.User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value,
+            FullName = authenticationState.User.Claims.FirstOrDefault(c => c.Type == "name")?.Value,
+            AvatarUrl = authenticationState.User.Claims.FirstOrDefault(c => c.Type == "picture")?.Value,
+            UserName = authenticationState.User.Claims.FirstOrDefault(c => c.Type == "nickname")?.Value,
+        };
     }
 
     // load completed quests
     private async Task LoadCompletedQuests()
     {
-        var query = new GetCompletedQuest.Query { UserId = Guid.Parse(UserGuid) };
+        var query = new GetCompletedQuest.Query { ProfileId = ProfileResponse.Id };
 
         CompletedQuests = await Sender.Send(query);
     }
@@ -69,16 +100,26 @@ public partial class Profile : ComponentBase
     {
         var query = new GetWeeklyAttendanceByUser.Query
         {
-            userid = Guid.Parse(UserGuid)
+            ProfileId = ProfileResponse.Id,
         };
 
         AttendanceActivities = await Sender.Send(query);
+    }
+    
+    //get available coins
+    private async Task GetExpendableCoins()
+    {
+        var getMonthlyPointQuery = new GetMonthlyPointsByProfileId.Query
+        {
+            ProfileId =  ProfileResponse.Id
+        };
+        MonthlyPoints = await Sender.Send(getMonthlyPointQuery);
     }
 
     // get total points ledger balance
     private async Task<int> GetTotalPoints()
     {
-        var query = new GetTotalPointLedgerBalance.Query { userid = Guid.Parse(UserGuid) };
+        var query = new GetTotalPointLedgerBalance.Query { ProfileId = ProfileResponse.Id };
 
         return await Sender.Send(query);
     }
@@ -86,22 +127,22 @@ public partial class Profile : ComponentBase
     // get total completed quests
     private async Task<int> GetTotalCompletedQuests()
     {
-        var query = new GetTotalCompletedQuests.Query { userid = Guid.Parse(UserGuid) };
+        var query = new GetTotalCompletedQuests.Query { ProfileId = ProfileResponse.Id };
 
         return await Sender.Send(query);
     }
-    
+
     // get total trophies
     private async Task<int> GetTotalTrophies()
     {
-        var query = new GetTotalAcknowledgements.Query { ReceiverId = Guid.Parse(UserGuid) };
+        var query = new GetTotalAcknowledgements.Query { ReceiverId = ProfileResponse.Id };
         return await Sender.Send(query);
     }
-    
+
     //get all users except the current user
-    private async Task<List<UserResponse>> GetAllUsersExcept()
+    private async Task<List<ProfileResponse>> GetAllProfilesExcept()
     {
-        var query = new GetAllUsersExcept.Query { userid = Guid.Parse(UserGuid) };
+        var query = new GetAllUsersExcept.Query { ProfileId = ProfileResponse.Id };
 
         return await Sender.Send(query);
     }
@@ -112,7 +153,7 @@ public partial class Profile : ComponentBase
         {
             Title = $"Hello {ProfileResponse.FirstName}",
             TrapFocus = false,
-            Modal = _modal,
+            Modal = true,
             PreventScroll = true,
             PreventDismissOnOverlayClick = true,
             ShowTitle = false,
@@ -144,9 +185,14 @@ public partial class Profile : ComponentBase
             DateOfBirth = ProfileResponse.DateOfBirth,
             CityAddress = ProfileResponse.CityAddress,
             JobTitle = ProfileResponse.JobTitle,
-            Gender = ProfileResponse.Gender?? true
+            Gender = ProfileResponse.Gender ?? true,
+            Auth0UserId = ProfileResponse.Auth0UserId,
+            Email = ProfileResponse.Email,
+            AvatarUrl = ProfileResponse.AvatarUrl,
+            FullName = ProfileResponse.FullName,
+            UserName = ProfileResponse.UserName
         };
-        
+
         DialogParameters parameters = new()
         {
             Title = $"Hello {ProfileResponse.FirstName}",
@@ -161,21 +207,17 @@ public partial class Profile : ComponentBase
         DialogResult result = await dialog.Result;
         if (result is { Cancelled: false, Data: not null })
         {
-          //  var updatedProfile = (ProfileRequest)result.Data;
-            //update profile
-           // var command = new UpdateProfile.Command { ProfileRequest = updatedProfile };
-           ProfileResponse =  (ProfileResponse)result.Data;
+            ProfileResponse = (ProfileResponse)result.Data;
         }
     }
-    
-    private async Task OpenSendThankYouModalAsync(Guid receiverId)
+
+    private async Task OpenSendThankYouModalAsync(int receiverId)
     {
-        
         var acknowledgementTagsQuery = new GetAllHashTags.Query();
         var acknowledgementTags = await Sender.Send(acknowledgementTagsQuery);
-        
+
         AcknowledgementRequest acknowledgementRequest = new()
-        { 
+        {
             ReceiverId = receiverId,
             SenderId = ProfileResponse.Id,
             AcknowledgmentDate = DateTime.Now,
@@ -183,12 +225,12 @@ public partial class Profile : ComponentBase
             Message = "Thank you for your hard work! 🙏 🎉",
             ReceiverList = [receiverId],
         };
-        
+
         DialogParameters parameters = new()
         {
             Title = $"Hello {ProfileResponse.FirstName}",
             TrapFocus = false,
-            Modal = _modal,
+            Modal = true,
             PreventScroll = true,
             PreventDismissOnOverlayClick = true,
             ShowTitle = false,
@@ -198,7 +240,8 @@ public partial class Profile : ComponentBase
             SecondaryAction = "Close",
         };
 
-        IDialogReference dialog = await DialogService.ShowDialogAsync<SendThankYouModal>(acknowledgementRequest, parameters);
+        IDialogReference dialog =
+            await DialogService.ShowDialogAsync<SendThankYouModal>(acknowledgementRequest, parameters);
         DialogResult result = await dialog.Result;
 
         if (result is { Cancelled: true, Data: not null })

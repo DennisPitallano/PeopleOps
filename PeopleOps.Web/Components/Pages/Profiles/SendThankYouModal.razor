@@ -3,7 +3,6 @@
 @using PeopleOps.Web.Features.Acknowledgements
 @using PeopleOps.Web.Features.MonthlyPoints
 @implements IDialogContentComponent<PeopleOps.Web.Contracts.AcknowledgementRequest>
-@inject Supabase.Client SupabaseClient
 @inject ISender Sender
 
 @code
@@ -41,9 +40,9 @@
     {
         _editContext = new EditContext(Content);
         // get the available monthly coins
-        var getMonthlyPointQuery = new GetMonthlyPointsByUserId.Query
+        var getMonthlyPointQuery = new GetMonthlyPointsByProfileId.Query
         {
-            UserId = Content.SenderId
+            ProfileId = Content.SenderId
         };
         _monthlyPoints = await Sender.Send(getMonthlyPointQuery);
         
