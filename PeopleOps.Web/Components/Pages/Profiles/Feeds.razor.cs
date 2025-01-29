@@ -7,10 +7,10 @@ namespace PeopleOps.Web.Components.Pages.Profiles;
 
 public partial class Feeds : ComponentBase
 {
+    
     private List<AcknowledgementResponse> Acknowledgements { get; set; } = [];
     [Inject] 
     private ISender Sender { get; set; } = null!;
-    
     
     protected override async Task OnInitializedAsync()
     {

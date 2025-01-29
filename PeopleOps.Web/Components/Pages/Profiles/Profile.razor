@@ -165,7 +165,16 @@
                                          src="/assets/media/images/gamer-trophy.svg">
                                 </FluentGridItem>
                                 <FluentGridItem xs="6">
-                                    <FluentLabel Typo="Typography.H2">19</FluentLabel>
+                                    <FluentLabel Typo="Typography.H2">
+                                        @if (IsLoadingData)
+                                        {
+                                            <FluentProgressRing Width="22px" Stroke="ProgressStroke.Small"/>
+                                        }
+                                        else
+                                        {
+                                            @TotalTrophies
+                                        }
+                                    </FluentLabel>
                                     <FluentLabel Color="Color.Custom" CustomColor="grey" Style="font-weight:500;">
                                         Trophies
                                     </FluentLabel>
@@ -173,7 +182,7 @@
                             </FluentGrid>
                         </FluentStack>
                     </FluentCard>
-
+ 
                     <FluentGrid Spacing="3" Style="margin-top:2rem;" Justify="JustifyContent.FlexStart">
                         <FluentGridItem xs="3" sm="4" HiddenWhen="GridItemHidden.SmAndDown">
                             <FluentStack Orientation="Orientation.Vertical" VerticalAlignment="VerticalAlignment.Center"

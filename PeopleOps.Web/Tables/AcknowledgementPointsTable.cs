@@ -3,7 +3,7 @@ using Supabase.Postgrest.Models;
 
 namespace PeopleOps.Web.Tables;
 
-[Table("acknowledgment_points")]
+[Table("acknowledgement_points")]
 public class AcknowledgementPointsTable : BaseModel
 {
     [PrimaryKey("id")]

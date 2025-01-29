@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
 using PeopleOps.Web.Contracts;
+using PeopleOps.Web.Features.Acknowledgements;
 using PeopleOps.Web.Features.Attendance;
 using PeopleOps.Web.Features.Profile;
 using PeopleOps.Web.Features.Quest;
@@ -30,7 +31,7 @@ public partial class Profile : ComponentBase
 
     private long TotalLedgerPointsBalance { get; set; }
     private int TotalCompletedQuests { get; set; }
-
+    private int TotalTrophies { get; set; }
     private bool IsLoadingData { get; set; }
 
     bool DeferredLoading = false;
@@ -47,7 +48,8 @@ public partial class Profile : ComponentBase
         var query = new GetProfile.Query { Id = Guid.Parse(UserGuid) };
 
         TotalLedgerPointsBalance = await GetTotalPoints();
-        TotalCompletedQuests = await GetTotalCompletedQuests();
+        TotalCompletedQuests = await GetTotalCompletedQuests(); 
+        TotalTrophies = await GetTotalTrophies();
         ProfileResponse = await Sender.Send(query);
 
         await LoadCompletedQuests();
@@ -88,6 +90,13 @@ public partial class Profile : ComponentBase
     {
         var query = new GetTotalCompletedQuests.Query { userid = Guid.Parse(UserGuid) };
 
+        return await Sender.Send(query);
+    }
+    
+    // get total trophies
+    private async Task<int> GetTotalTrophies()
+    {
+        var query = new GetTotalAcknowledgements.Query { ReceiverId = Guid.Parse(UserGuid) };
         return await Sender.Send(query);
     }
     
@@ -198,8 +207,8 @@ public partial class Profile : ComponentBase
         {
             TotalLedgerPointsBalance = await GetTotalPoints();
             TotalCompletedQuests = await GetTotalCompletedQuests();
+            TotalTrophies = await GetTotalTrophies();
             await LoadCompletedQuests();
         }
     }
-    
 }
