@@ -1,4 +1,5 @@
 ﻿using System.Security.Claims;
+using FluentResults;
 using Microsoft.AspNetCore.Components;
 using PeopleOps.Web.Contracts;
 using PeopleOps.Web.Features.Acknowledgements;
@@ -42,9 +43,9 @@ public partial class Profile : ComponentBase
     private int TotalCompletedQuests { get; set; }
     private int TotalTrophies { get; set; }
     private bool IsLoadingData { get; set; }
-    
-    private MonthlyPointsResponse? MonthlyPoints { get; set; }
-    
+
+    private Result<MonthlyPointsResponse> MonthlyPoints { get; set; } = new();
+
     #endregion
 
     protected override async Task OnInitializedAsync()
@@ -224,6 +225,7 @@ public partial class Profile : ComponentBase
             AcknowledgementTags = acknowledgementTags,
             Message = "Thank you for your hard work! 🙏 🎉",
             ReceiverList = [receiverId],
+            MonthlyPoints = MonthlyPoints
         };
 
         DialogParameters parameters = new()
@@ -244,11 +246,12 @@ public partial class Profile : ComponentBase
             await DialogService.ShowDialogAsync<SendThankYouModal>(acknowledgementRequest, parameters);
         DialogResult result = await dialog.Result;
 
-        if (result is { Cancelled: true, Data: not null })
+        if (result is { Cancelled: false, Data: not null })
         {
             TotalLedgerPointsBalance = await GetTotalPoints();
             TotalCompletedQuests = await GetTotalCompletedQuests();
             TotalTrophies = await GetTotalTrophies();
+            await GetExpendableCoins();
             await LoadCompletedQuests();
         }
     }

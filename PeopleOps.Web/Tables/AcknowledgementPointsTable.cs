@@ -16,7 +16,7 @@ public class AcknowledgementPointsTable : BaseModel
     public long AcknowledgmentId { get; set; }
     
     [Column("receiver_id")]
-    public Guid ReceiverId { get; set; }
+    public int ReceiverId { get; set; }
     
     [Column("points_earned")]
     public int Coins { get; set; }

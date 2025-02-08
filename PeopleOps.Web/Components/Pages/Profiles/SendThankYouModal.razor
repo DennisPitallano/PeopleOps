@@ -1,4 +1,5 @@
-﻿@using MediatR
+﻿@using FluentResults
+@using MediatR
 @using PeopleOps.Web.Contracts
 @using PeopleOps.Web.Features.Acknowledgements
 @using PeopleOps.Web.Features.MonthlyPoints
@@ -17,8 +18,8 @@
     private readonly HashSet<TagResponse> _visibleResourceTypes = new();
 
     private readonly List<int> _availableCoins = [];
-    
-    private MonthlyPointsResponse? _monthlyPoints = new();
+
+    private Result<MonthlyPointsResponse> MonthlyPoints { get; set; } = new();
     //a function that list of available coins depending on the available coins
     private void SetAvailableCoins(int coins)
     {
@@ -44,10 +45,13 @@
         {
             ProfileId = Content.SenderId
         };
-        _monthlyPoints = await Sender.Send(getMonthlyPointQuery);
-        
-        SetAvailableCoins(_monthlyPoints?.AvailableCoins ?? 0);
-        
+        //MonthlyPoints = await Sender.Send(getMonthlyPointQuery);
+        /*if (MonthlyPoints.IsSuccess)
+        {
+           
+
+        }*/
+        SetAvailableCoins(Content.MonthlyPoints.Value.AvailableCoins);
         await base.OnInitializedAsync();
     }
 
@@ -151,7 +155,7 @@
             </FluentStack>
         </FluentStack>
         <div style="margin:10px;">
-            <FluentRadioGroup @bind-Value="Content.Coins"  Name="best-pilot" Label="@_monthlyPoints?.AvailableCoinsLabel">
+            <FluentRadioGroup @bind-Value="Content.Coins"  Name="best-pilot" Label="@Content.MonthlyPoints.Value.AvailableCoinsLabel">
                 @foreach (var coin in _availableCoins)
                 {
                     <FluentRadio Value="@coin">

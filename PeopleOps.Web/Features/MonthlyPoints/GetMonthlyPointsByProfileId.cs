@@ -1,4 +1,7 @@
-﻿using PeopleOps.Web.Contracts;
+﻿using System.Globalization;
+using FluentResults;
+using Microsoft.FluentUI.AspNetCore.Components.Extensions;
+using PeopleOps.Web.Contracts;
 using PeopleOps.Web.Tables;
 using Supabase.Postgrest;
 using Client = Supabase.Client;
@@ -7,23 +10,34 @@ namespace PeopleOps.Web.Features.MonthlyPoints;
 
 public static class GetMonthlyPointsByProfileId
 {
-    public class Query : IRequest<MonthlyPointsResponse>
+    public class Query : IRequest<Result<MonthlyPointsResponse>>
     {
         public int ProfileId { get; set; }
     }
 
-    internal sealed class Handler(Client supabaseClient) : IRequestHandler<Query, MonthlyPointsResponse>
+    internal sealed class Handler(Client supabaseClient) : IRequestHandler<Query, Result<MonthlyPointsResponse>>
     {
-        public async Task<MonthlyPointsResponse> Handle(Query request, CancellationToken cancellationToken)
+        public async Task<Result<MonthlyPointsResponse>> Handle(Query request, CancellationToken cancellationToken)
         {
             var monthYear = DateOnly.FromDateTime(DateTime.Now);
+            var todayMonth = DateTime.Now.GetMonth(CultureInfo.InvariantCulture);
+            var todayYear = DateTime.Now.GetYear(CultureInfo.InvariantCulture);
+
+            var filters = new Dictionary<string, string>
+            {
+                { "profile_id", request.ProfileId.ToString() },
+                { "year", todayYear.ToString() },
+                { "month", todayMonth.ToString() },
+                {"is_revoke", "false"}
+            };
+
             var response = await supabaseClient
                 .From<MonthlyPointsTable>()
-                .Where(p => p.ProfileId == request.ProfileId && p.IsRevoke == false)
-                .Single(cancellationToken: cancellationToken);
+                .Match(filters)
+                .Single(cancellationToken);
 
-            if (response is not null) return MapToMonthlyPointsResponse(response);
-            
+            if (response is not null)   return Result.Ok(MapToMonthlyPointsResponse(response));
+
             // Create new monthly points
             var newMonthlyPoints = new MonthlyPointsTable
             {
@@ -38,9 +52,11 @@ public static class GetMonthlyPointsByProfileId
             var baseResponse = await supabaseClient.From<MonthlyPointsTable>()
                 .Insert(newMonthlyPoints, new QueryOptions { Returning = QueryOptions.ReturnType.Representation },
                     cancellationToken);
-
-            return MapToMonthlyPointsResponse(baseResponse.Model);
-
+            if (baseResponse.Model is null)
+            {
+                return Result.Fail<MonthlyPointsResponse>("Failed to create monthly points");
+            }
+            return Result.Ok(MapToMonthlyPointsResponse(baseResponse.Model));
         }
 
         private static MonthlyPointsResponse MapToMonthlyPointsResponse(MonthlyPointsTable points) =>

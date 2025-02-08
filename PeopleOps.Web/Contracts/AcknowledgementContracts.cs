@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
+using FluentResults;
 
 namespace PeopleOps.Web.Contracts;
 
@@ -30,6 +31,8 @@ public class AcknowledgementRequest
     public int Coins { get; set; }
     
     public List<TagResponse> AcknowledgementTags { get; set; } = new();
+    
+    public Result<MonthlyPointsResponse> MonthlyPoints { get; set; } = new();
 }
 
 public class AcknowledgementResponse

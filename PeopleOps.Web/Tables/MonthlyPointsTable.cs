@@ -26,4 +26,8 @@ public class MonthlyPointsTable : BaseModel
     
     [Column("is_revoke")]
     public bool IsRevoke { get; set; }
+    [Column("year")]
+    public int Year { get; set; }
+    [Column("month")]
+    public int Month { get; set; }
 }

@@ -52,7 +52,7 @@
                 {
                     <FluentButton Appearance="Appearance.Accent" Style="font-weight:500; font-size:small;"
                                   @onclick="OpenCompleteProfileModalAsync">
-                        Complete Profile
+                        Complete your profile
                     </FluentButton>
                 }
                 else
@@ -109,7 +109,14 @@
                                             }
                                             else
                                             {
-                                                @MonthlyPoints.AvailableCoins
+                                                if (MonthlyPoints.IsSuccess)
+                                                {
+                                                    @MonthlyPoints.Value.AvailableCoins
+                                                }
+                                                else
+                                                {
+                                                    <span>@MonthlyPoints.Errors.First().Message</span>
+                                                }
                                             }
                                         </FluentLabel>
                                         <FluentLabel Color="Color.Custom" CustomColor="grey" Style="font-weight:500;">
@@ -118,7 +125,7 @@
                                     </FluentGridItem>
                                 </FluentGrid>
                                 <FluentSpacer/>
-                                <FluentDivider Style="height: 50px;" Role="DividerRole.Presentation"
+                                <FluentDivider Style="height: 50px;" Role=DividerRole.Presentation
                                                Orientation="Orientation.Vertical"></FluentDivider>
                                 <FluentGrid Spacing="2" Justify="JustifyContent.SpaceEvenly"
                                             Style="padding-left: 10px; padding-right: 10px;">
