@@ -1,8 +1,6 @@
-﻿@using FluentResults
-@using MediatR
+﻿@using MediatR
 @using PeopleOps.Web.Contracts
 @using PeopleOps.Web.Features.Acknowledgements
-@using PeopleOps.Web.Features.MonthlyPoints
 @implements IDialogContentComponent<PeopleOps.Web.Contracts.AcknowledgementRequest>
 @inject ISender Sender
 
@@ -19,7 +17,6 @@
 
     private readonly List<int> _availableCoins = [];
 
-    private Result<MonthlyPointsResponse> MonthlyPoints { get; set; } = new();
     //a function that list of available coins depending on the available coins
     private void SetAvailableCoins(int coins)
     {
@@ -40,17 +37,7 @@
     protected override async Task OnInitializedAsync()
     {
         _editContext = new EditContext(Content);
-        // get the available monthly coins
-        var getMonthlyPointQuery = new GetMonthlyPointsByProfileId.Query
-        {
-            ProfileId = Content.SenderId
-        };
-        //MonthlyPoints = await Sender.Send(getMonthlyPointQuery);
-        /*if (MonthlyPoints.IsSuccess)
-        {
-           
-
-        }*/
+        
         SetAvailableCoins(Content.MonthlyPoints.Value.AvailableCoins);
         await base.OnInitializedAsync();
     }
@@ -111,11 +98,10 @@
                 var message = Content.Message;
                 foreach (var resourceType in Content.AcknowledgementTags)
                 {
-                    if (!message.Contains(resourceType.TagName))
-                    {
-                        Content.Message += $"\n{resourceType.TagName}";
-                        Content.TagIds.Add(resourceType.Id);
-                    }
+                    if (resourceType.TagName == null || message.Contains(resourceType.TagName)) continue;
+                    
+                    Content.Message += $"\n{resourceType.TagName}";
+                    Content.TagIds.Add(resourceType.Id);
                 }
             }
             else if (value == false)
@@ -124,11 +110,10 @@
                 var message = Content.Message;
                 foreach (var resourceType in Content.AcknowledgementTags)
                 {
-                    if (message.Contains(resourceType.TagName))
-                    {
-                        Content.Message = Content.Message.Replace($"\n{resourceType.TagName}", "");
-                        Content.TagIds.Remove(resourceType.Id);
-                    }
+                    if (resourceType.TagName == null || !message.Contains(resourceType.TagName)) continue;
+                    
+                    Content.Message = Content.Message.Replace($"\n{resourceType.TagName}", "");
+                    Content.TagIds.Remove(resourceType.Id);
                 }
             }
         }

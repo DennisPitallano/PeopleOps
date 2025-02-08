@@ -212,19 +212,19 @@ public partial class Profile : ComponentBase
         }
     }
 
-    private async Task OpenSendThankYouModalAsync(int receiverId)
+    private async Task OpenSendThankYouModalAsync(ProfileResponse receiver)
     {
         var acknowledgementTagsQuery = new GetAllHashTags.Query();
         var acknowledgementTags = await Sender.Send(acknowledgementTagsQuery);
 
         AcknowledgementRequest acknowledgementRequest = new()
         {
-            ReceiverId = receiverId,
+            ReceiverId = receiver.Id,
             SenderId = ProfileResponse.Id,
             AcknowledgmentDate = DateTime.Now,
             AcknowledgementTags = acknowledgementTags,
-            Message = "Thank you for your hard work! 🙏 🎉",
-            ReceiverList = [receiverId],
+            Message = $"@{receiver.UserName} Thank you for your hard work! 🙏 🎉",
+            ReceiverList = [receiver.Id],
             MonthlyPoints = MonthlyPoints
         };
 

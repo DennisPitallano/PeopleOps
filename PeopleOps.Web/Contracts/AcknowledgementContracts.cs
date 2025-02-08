@@ -17,7 +17,7 @@ public class AcknowledgementRequest
     public List<int> ReceiverList { get; set; } = new();
     public DateTime AcknowledgmentDate { get; set; }
     [Required (ErrorMessage = "Message is required")]
-    public string Message { get; set; }
+    public required string Message { get; set; }
     
     [Required (ErrorMessage = "Tags are required")]
     // should be greater than 0
@@ -46,7 +46,9 @@ public class AcknowledgementResponse
     [JsonPropertyName("acknowledgment_date")]
     public DateTime AcknowledgmentDate { get; set; }
     [JsonPropertyName("message")]
-    public string Message { get; set; }
+    public string? Message { get; set; }
+    
+    public ProfileResponse Sender { get; set; } = new();
     
 }
 
@@ -62,4 +64,18 @@ public class AcknowledgementTagRequest
 {
     public long AcknowledgmentId { get; set; }
     public long TagId { get; set; }
+}
+
+public class AcknowledgementPointsResponse
+{
+    [JsonPropertyName("id")]
+    public long Id { get; set; }
+    [JsonPropertyName("created_at")]
+    public DateTime CreatedAt { get; set; }
+    [JsonPropertyName("acknowledgment_id")]
+    public long AcknowledgmentId { get; set; }
+    [JsonPropertyName("receiver_id")]
+    public int ReceiverId { get; set; }
+    [JsonPropertyName("points_earned")]
+    public int PointsEarned { get; set; }
 }

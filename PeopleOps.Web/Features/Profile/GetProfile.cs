@@ -32,7 +32,10 @@ public static class GetProfile
                 Email = profile.Email,
                 Gender = profile.Gender,
                 JobTitle = profile.JobTitle,
-                CityAddress = profile.CityAddress
+                CityAddress = profile.CityAddress,
+                FullName = profile.FullName,
+                Auth0UserId = profile.Auth0UserId,
+                UserName = profile.UserName
             };
         }
     }

@@ -19,7 +19,7 @@ public static class SignOutAttendance
         {
             var attendance = await supabaseClient.From<AttendanceTable>()
                 .Where(p => p.Id == request.Id)
-                .Set(x=>x.TimeOut,DateTime.Now)
+                .Set(x=>x.TimeOut!,DateTime.Now)
                 .Update(cancellationToken: cancellationToken).ConfigureAwait(false);
             
             var updatedAttendance = attendance.Models.Single();

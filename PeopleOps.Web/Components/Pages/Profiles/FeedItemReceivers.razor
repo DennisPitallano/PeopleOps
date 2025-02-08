@@ -1,0 +1,68 @@
+﻿@using FluentResults
+@using PeopleOps.Web.Contracts
+@using PeopleOps.Web.Features.Acknowledgements
+@using PeopleOps.Web.Features.Profile
+@inject ISender Sender
+@code {
+
+    [Parameter] 
+    public AcknowledgementResponse Acknowledgement { get; set; } = new();
+
+    private List<ProfileResponse> ReceiverProfiles { get; set; } = new();
+    
+    private Result<List<AcknowledgementPointsResponse>> AcknowledgementPoints { get; set; } = new();
+    
+    private bool IsLoading { get; set; } = true;
+    
+    protected override async Task OnInitializedAsync()
+    {
+        IsLoading = true;
+        
+        var getAcknowledgementPointsQuery = new GetAcknowledgementPointsByAcknowledgementId.Query
+        {
+            AcknowledgementId = Acknowledgement.Id
+        };
+        
+        AcknowledgementPoints = await Sender.Send(getAcknowledgementPointsQuery);
+
+        if (AcknowledgementPoints.IsSuccess)
+        {
+            foreach (var acknowledgementPoint in AcknowledgementPoints.Value)
+            {
+                var getProfileQuery = new GetProfile.Query
+                {
+                    Id = acknowledgementPoint.ReceiverId
+                };
+                var receiverProfile = await Sender.Send(getProfileQuery);
+            
+                ReceiverProfiles.Add(receiverProfile);
+            }
+        }
+        
+        IsLoading = false;
+    }
+}
+
+@if(IsLoading)
+{
+    <FluentProgressRing></FluentProgressRing>
+}
+else
+{
+    @foreach (var receiverProfile in ReceiverProfiles)
+    {
+        <FluentStack Orientation="Orientation.Horizontal" HorizontalGap="10" HorizontalAlignment="HorizontalAlignment.Start"
+                     VerticalAlignment="VerticalAlignment.Center">
+            <FluentBadge Circular=true Appearance="Appearance.Neutral" Class="shadow">
+                <span>+🏆</span>
+            </FluentBadge>
+            <FluentPersona Class="shadow" StatusSize="PresenceBadgeSize.Tiny"
+                           StatusTitle="@receiverProfile.FullName"
+                           Image="@receiverProfile.GetAvatar"
+                           ImageSize="28px"
+                           Status="PresenceStatus.Available">
+            </FluentPersona>
+        </FluentStack>
+       
+    }
+}

@@ -40,7 +40,7 @@ public class ProfileResponse
     [JsonPropertyName("id")]
     public int Id { get; set; }
 
-    [JsonPropertyName("user_name")]
+    [JsonPropertyName("username")]
     public string? UserName { get; set; }
 
     [JsonPropertyName("updated_at")]

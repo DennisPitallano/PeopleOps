@@ -11,5 +11,5 @@ public class TagResponse
     public DateTime CreatedAt { get; set; }
     
     [JsonPropertyName("tag_name")]
-    public string TagName { get; set; }
+    public string? TagName { get; set; }
 }

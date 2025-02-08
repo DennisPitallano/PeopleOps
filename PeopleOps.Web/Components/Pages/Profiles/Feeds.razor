@@ -1,65 +1,75 @@
-﻿@code
+﻿@using PeopleOps.Web.Extensions
+@code
 {
-  Dictionary<string, object>  _tabItemAttributes = new Dictionary<string, object>
+  Dictionary<string, object> _tabItemAttributes = new Dictionary<string, object>
   {
     { "style", "padding:0;" },
   };
 }
+
 <FluentGrid Justify="JustifyContent.SpaceEvenly" Spacing="2">
-
-  @foreach (var acknowledgement in Acknowledgements)
+  @if (Acknowledgements.Count == 0)
   {
-    var tabCommentsId = $"tab-comments-{acknowledgement.Id}";
-    var tabLikesId = $"tab-likes-{acknowledgement.Id}";
+    <FluentProgressRing ></FluentProgressRing>
+  }
+  else
+  {
+    foreach (var acknowledgement in Acknowledgements)
+    {
+      var tabCommentsId = $"tab-comments-{acknowledgement.Id}";
+      var tabLikesId = $"tab-likes-{acknowledgement.Id}";
 
-    <FluentGridItem xs="12" Justify="JustifyContent.FlexStart" Gap="3">
-      <FluentCard Style="padding:0.5rem; box-shadow: 0 3px 4px 0 rgba(0, 0, 0, .03) !important;border-radius: .75rem !important; border: 1px solid  #f1f1f4; !important;">
-        <FluentStack Orientation="Orientation.Horizontal" HorizontalGap="3">
-          <FluentLabel Typo="Typography.H6">@acknowledgement.SenderId</FluentLabel>
-        </FluentStack>
-        <FluentStack Orientation="Orientation.Horizontal" HorizontalGap="3">
-          <span>🏆</span>
-          <FluentLabel Typo="Typography.Body">@acknowledgement.AcknowledgmentDate</FluentLabel>
-        </FluentStack>
-        <div style="padding:10px 0"></div>
-        <FluentLabel Typo="Typography.Body">
-          @((MarkupString)acknowledgement.Message.Replace("\n", "<br />"))
-        </FluentLabel>
-        <div style="padding:10px 0" class="border-b-dashed"></div>
-        <FluentTabs ActiveTabId="@tabCommentsId" ShowActiveIndicator="false">
-          <div slot="end">
-            <FluentButton Appearance="Appearance.Outline">
-              <FluentIcon Value="@(new Icons.Regular.Size16.ThumbLike())" Color="Color.Error" Slot="start" /> Like
-            </FluentButton>
-          </div>
-          <FluentTab Id="@tabCommentsId">
-            <Header>
+      <FluentGridItem xs="12" Justify="JustifyContent.FlexStart" Gap="3">
+        <FluentCard
+          Style="padding:0.5rem; box-shadow: 0 3px 4px 0 rgba(0, 0, 0, .03) !important;border-radius: .75rem !important; border: 1px solid  #f1f1f4; !important;">
+          <FluentStack Orientation="Orientation.Horizontal" HorizontalAlignment="HorizontalAlignment.Stretch" HorizontalGap="10"
+                       VerticalAlignment="VerticalAlignment.Center">
+            <FeedItemReceivers Acknowledgement="acknowledgement"></FeedItemReceivers>
+            <div style="width:100px;">@acknowledgement.AcknowledgmentDate.Humanize()</div>
+          </FluentStack>
+          <div style="padding:10px 0"></div>
+          <FluentLabel Typo="Typography.Body">
+            <span style="font-weight:500;"> @acknowledgement.Sender.FullName: </span>
+            @((MarkupString)acknowledgement.Message.Replace("\n", "<br />"))
+          </FluentLabel>
+          <div style="padding:10px 0" class="border-b-dashed"></div>
+          <FluentTabs ActiveTabId="@tabCommentsId" ShowActiveIndicator="false">
+            <div slot="end">
+              <FluentButton Appearance="Appearance.Outline">
+                <FluentIcon Value="@(new Icons.Regular.Size16.ThumbLike())" Color="Color.Error" Slot="start"/>
+                Like
+              </FluentButton>
+            </div>
+            <FluentTab Id="@tabCommentsId">
+              <Header>
                 <div class="feed-tab-item">
                   <FluentIcon Value="@(new Icons.Regular.Size16.Comment())"/>
                   <span style="padding-left:5px;"> 22 Comments</span>
                 </div>
-            </Header>
-            <Content>
-              <div class="border-t-dashed">
-                Content Comments
-              </div>
-            </Content>
-          </FluentTab>
-          <FluentTab Id="@tabLikesId" >
-            <Header>
+              </Header>
+              <Content>
+                <div class="border-t-dashed">
+                  Content Comments
+                </div>
+              </Content>
+            </FluentTab>
+            <FluentTab Id="@tabLikesId">
+              <Header>
                 <div class="feed-tab-item">
                   <FluentIcon Value="@(new Icons.Regular.Size16.Heart())" Color="@Color.Error"/>
                   <span style="padding-left:5px;"> 100k Likes</span>
                 </div>
-            </Header>
-            <Content>
-              <div class="border-t-dashed">
-              Content 1
-              </div>
-            </Content>
-          </FluentTab>
-        </FluentTabs>
-      </FluentCard>
-    </FluentGridItem>
+              </Header>
+              <Content>
+                <div class="border-t-dashed">
+                  Content 1
+                </div>
+              </Content>
+            </FluentTab>
+          </FluentTabs>
+        </FluentCard>
+      </FluentGridItem>
+    }
   }
+
 </FluentGrid>

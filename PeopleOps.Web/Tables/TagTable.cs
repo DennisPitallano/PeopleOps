@@ -1,4 +1,5 @@
-﻿using Supabase.Postgrest.Attributes;
+﻿
+using Supabase.Postgrest.Attributes;
 using Supabase.Postgrest.Models;
 
 namespace PeopleOps.Web.Tables;
@@ -13,5 +14,5 @@ public class TagTable : BaseModel
     public DateTime CreatedAt { get; set; }
     
     [Column("tag_name")]
-    public string TagName { get; set; }
+    public string? TagName { get; set; }
 }

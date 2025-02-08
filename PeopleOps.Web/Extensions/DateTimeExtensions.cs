@@ -2,31 +2,67 @@
 
 public static class PoDateTimeExtensions
 {
-    public static List<DateTime> GetWorkingDays(DateTime startDate, DayOfWeek startDay, DayOfWeek endDay)
+ 
+    public static string Humanize(this DateTime dt)
     {
-        var workingDays = new List<DateTime>();
-        var currentDate = startDate;
-
-        while (currentDate.DayOfWeek != startDay)
+        var timeSpan = DateTime.Now.Subtract(dt);
+        if (timeSpan <= TimeSpan.FromSeconds(60))
         {
-            currentDate = currentDate.AddDays(-1);
+            return "Just now";
         }
-
-        while (currentDate.DayOfWeek != endDay)
+        if (timeSpan <= TimeSpan.FromMinutes(1))
         {
-            if (currentDate.DayOfWeek != DayOfWeek.Saturday && currentDate.DayOfWeek != DayOfWeek.Sunday)
-            {
-                workingDays.Add(currentDate);
-            }
-            currentDate = currentDate.AddDays(1);
+            return timeSpan.Seconds + " seconds ago";
         }
-
-        if (currentDate.DayOfWeek != DayOfWeek.Saturday && currentDate.DayOfWeek != DayOfWeek.Sunday)
+        if (timeSpan <= TimeSpan.FromMinutes(2))
         {
-            workingDays.Add(currentDate);
+            return "1 minute ago";
         }
-
-        return workingDays;
+        if (timeSpan <= TimeSpan.FromHours(1))
+        {
+            return timeSpan.Minutes + " minutes ago";
+        }
+        if (timeSpan <= TimeSpan.FromHours(2))
+        {
+            return "1 hr ago";
+        }
+        if (timeSpan <= TimeSpan.FromDays(1))
+        {
+            return timeSpan.Hours + " hours ago";
+        }
+        if (timeSpan <= TimeSpan.FromDays(2))
+        {
+            return "yesterday"; 
+        }
+        if (timeSpan <= TimeSpan.FromDays(7))
+        {
+            return timeSpan.Days + " days ago";
+        }
+        if (timeSpan <= TimeSpan.FromDays(14))
+        {
+            return "last week";
+        }
+        if (timeSpan <= TimeSpan.FromDays(21))
+        {
+            return "2 weeks ago";
+        }
+        if (timeSpan <= TimeSpan.FromDays(28))
+        {
+            return "3 weeks ago";
+        }
+        if (timeSpan <= TimeSpan.FromDays(60))
+        {
+            return "last month";
+        }
+        if (timeSpan <= TimeSpan.FromDays(365))
+        {
+            return timeSpan.Days / 30 + " months ago";
+        }
+        if (timeSpan <= TimeSpan.FromDays(730))
+        {
+            return "last year";
+        }
+        return timeSpan.Days / 365 + " years ago";
     }
     
     public static DateTime EndOfWeek(this DateTime dt, DayOfWeek endOfWeek)

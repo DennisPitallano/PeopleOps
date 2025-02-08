@@ -4,7 +4,8 @@
 @inject IdentityRedirectManager IdentityRedirectManager
 @code {
     [CascadingParameter]
-    HttpContext HttpContext { get; set; }
+    HttpContext HttpContext { get; set; } = null!;
+
     protected override void OnInitialized()
     {
         var uri = NavigationManager.Uri;

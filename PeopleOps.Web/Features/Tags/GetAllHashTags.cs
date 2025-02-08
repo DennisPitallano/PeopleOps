@@ -13,7 +13,9 @@ public static class GetAllHashTags
     {
         public async Task<List<TagResponse>> Handle(Query request, CancellationToken cancellationToken)
         {
-            var baseResponse = await supabaseClient.From<TagTable>().Get(cancellationToken);
+            var baseResponse = await supabaseClient.From<TagTable>()
+                .Get(cancellationToken);
+            
             var tags = baseResponse.Models.Select(x => new TagResponse
             {
                 Id = x.Id,

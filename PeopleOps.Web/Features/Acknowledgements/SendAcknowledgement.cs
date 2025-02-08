@@ -11,7 +11,7 @@ public static class SendAcknowledgement
 {
     public class Command : IRequest<AcknowledgementResponse>
     {
-        public AcknowledgementRequest AcknowledgementRequest { get; set; }
+        public required AcknowledgementRequest AcknowledgementRequest { get; set; }
     }
 
     internal sealed class Handler(Client supabaseClient, ISender sender) : IRequestHandler<Command, AcknowledgementResponse>
@@ -36,7 +36,7 @@ public static class SendAcknowledgement
 
             if (insertedAcknowledgment is null)
             {
-                
+                return new AcknowledgementResponse();
             }
             // insert acknowledgment tags
             List<AcknowledgementTagTable> acknowledgmentTags = request.AcknowledgementRequest.TagIds.Select(tag =>
@@ -67,10 +67,10 @@ public static class SendAcknowledgement
                 ProfileId =  request.AcknowledgementRequest.SenderId
             };
             
-             Result<MonthlyPointsResponse>?  availableMonthlyPoints = await _sender.Send(getMonthlyPointQuery, cancellationToken);
+             Result<MonthlyPointsResponse>  availableMonthlyPoints = await _sender.Send(getMonthlyPointQuery, cancellationToken);
 
             // update monthly points
-            var updatedMonthlyPoints = await supabaseClient
+            await supabaseClient
                 .From<MonthlyPointsTable>()
                 .Where(p => p.Id == availableMonthlyPoints.Value.Id)
                 .Set(x => x.PointsSpent, availableMonthlyPoints.Value.PointsSpent + totalCoins)
@@ -81,7 +81,6 @@ public static class SendAcknowledgement
                 Id = insertedAcknowledgment.Id,
                 CreatedAt = insertedAcknowledgment.CreatedAt,
                 SenderId = insertedAcknowledgment.SenderId,
-                // ReceiverId = insertedAcknowledgment.ReceiverId,
                 AcknowledgmentDate = insertedAcknowledgment.AcknowledgmentDate,
                 Message = insertedAcknowledgment.Message
             };

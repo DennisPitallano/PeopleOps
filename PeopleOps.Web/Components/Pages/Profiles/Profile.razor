@@ -346,7 +346,7 @@
                             </FluentStack>
 
                         </FluentGridItem>
-                        <FluentGridItem xs="8">
+                        <FluentGridItem xs="12" sm="8">
                             <Feeds></Feeds>
                         </FluentGridItem>
 
@@ -386,7 +386,7 @@
                                             <code style="color:#333333;">@(user.JobTitle ?? "N/A")</code>
                                         </p>
                                         <FluentButton Appearance="Appearance.Outline"
-                                                      OnClick="() => OpenSendThankYouModalAsync(user.Id)">
+                                                      OnClick="() => OpenSendThankYouModalAsync(user)">
                                             Acknowledge 🪙🎉
                                         </FluentButton>
                                     </FluentCard>

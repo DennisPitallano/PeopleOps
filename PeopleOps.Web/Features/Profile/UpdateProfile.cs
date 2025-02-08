@@ -19,12 +19,12 @@ public static class UpdateProfile
             var profile = request.ProfileRequest;
             var profiles = await supabaseClient.From<ProfileTable>()
                 .Where(p => p.Id == profile.Id)
-                .Set(p => p.FirstName, profile.FirstName)
-                .Set(p => p.LastName, profile.LastName)
-                .Set(p => p.DateOfBirth, profile.DateOfBirth)
-                .Set(p => p.JobTitle, profile.JobTitle)
-                .Set(p => p.CityAddress, profile.CityAddress)
-                .Set(p => p.Gender, profile.Gender)
+                .Set(p => p.FirstName!, profile.FirstName)
+                .Set(p => p.LastName!, profile.LastName)
+                .Set(p => p.DateOfBirth!, profile.DateOfBirth)
+                .Set(p => p.JobTitle!, profile.JobTitle)
+                .Set(p => p.CityAddress!, profile.CityAddress)
+                .Set(p => p.Gender!, profile.Gender)
                 .Update(cancellationToken: cancellationToken).ConfigureAwait(false);
 
             var updatedProfile = profiles.Models.Single();

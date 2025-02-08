@@ -42,16 +42,16 @@ var options = new SupabaseOptions
     
 };
 // Note the creation as a singleton.
-builder.Services.AddScoped(_ => new Client(url, key, options));
+builder.Services.AddScoped(_ => new Client(url!, key, options));
 
 //builder.Services.AddScoped<AuthenticationStateProvider, SupabaseAuthenticationStateProvider>();
 builder.Services.AddScoped<AuthenticationStateProvider, PersistingRevalidatingAuthenticationStateProvider>();
 
-builder.Services.AddAuth0WebAppAuthentication(options =>
+builder.Services.AddAuth0WebAppAuthentication(appOptions =>
 {
-    options.Domain = builder.Configuration["Auth0:Domain"]!;
-    options.ClientId = builder.Configuration["Auth0:ClientId"]!;
-    options.Scope = "openid profile email";
+    appOptions.Domain = builder.Configuration["Auth0:Domain"]!;
+    appOptions.ClientId = builder.Configuration["Auth0:ClientId"]!;
+    appOptions.Scope = "openid profile email";
     /*options.OpenIdConnectEvents.OnTokenValidated = async context =>
     {
        // var userService = context.HttpContext.RequestServices.GetRequiredService<UserService>();
@@ -80,9 +80,9 @@ builder.Services.AddStackExchangeRedisCache(options =>
 
 // add hybrid cache
 #pragma warning disable EXTEXP0018
-builder.Services.AddHybridCache(options =>
+builder.Services.AddHybridCache(cacheOptions =>
 {
-    options.DefaultEntryOptions = new HybridCacheEntryOptions()
+    cacheOptions.DefaultEntryOptions = new HybridCacheEntryOptions()
     {
         LocalCacheExpiration = TimeSpan.FromMinutes(30),
         Expiration = TimeSpan.FromMinutes(15)
@@ -116,7 +116,7 @@ builder.Services.Configure<EmailSetting>(builder.Configuration.GetSection("Fluen
 builder.Services.AddScoped<IEmailService, EmailService>();
 var app = builder.Build();
 
-app.UseHangfireDashboard("/hangfire");
+app.UseHangfireDashboard();
 
 if (!app.Environment.IsDevelopment())
 {

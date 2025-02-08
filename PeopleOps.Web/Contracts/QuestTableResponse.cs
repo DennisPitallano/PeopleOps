@@ -26,13 +26,13 @@ public class QuestTableResponse
     public DateTime? CompletionDate { get; set; }
     
     [JsonPropertyName("quest_group")]
-    public string QuestGroup { get; set; }
+    public string? QuestGroup { get; set; }
     
     [JsonPropertyName("quest_name")]
-    public string QuestName { get; set; }
+    public string? QuestName { get; set; }
     
     [JsonPropertyName("quest_description")]
-    public string QuestDescription { get; set; }
+    public string? QuestDescription { get; set; }
     
     [JsonPropertyName("points")]
     public int QuestPoints { get; set; }

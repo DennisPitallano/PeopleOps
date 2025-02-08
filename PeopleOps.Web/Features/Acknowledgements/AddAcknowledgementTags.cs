@@ -7,7 +7,7 @@ public static class AddAcknowledgementTags
 {
     public class Command : IRequest<AcknowledgementTagResponse>
     {
-        public List<AcknowledgementTagRequest>? AcknowledgementTagRequests { get; set; }
+        public List<AcknowledgementTagRequest> AcknowledgementTagRequests { get; set; } = new();
     }
 
     internal sealed class Handler(Client supabaseClient) : IRequestHandler<Command, AcknowledgementTagResponse>
@@ -26,9 +26,8 @@ public static class AddAcknowledgementTags
                 await supabaseClient
                     .From<AcknowledgementTagTable>()
                     .Insert(acknowledgmentTag, cancellationToken: cancellationToken);
-                
             }
-            
+
             return new AcknowledgementTagResponse();
         }
     }

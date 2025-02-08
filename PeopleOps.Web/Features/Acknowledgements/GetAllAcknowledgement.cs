@@ -1,6 +1,7 @@
 ﻿using System.Text.Json;
 using System.Text.Json.Serialization;
 using PeopleOps.Web.Contracts;
+using PeopleOps.Web.Features.Profile;
 
 namespace PeopleOps.Web.Features.Acknowledgements;
 
@@ -8,10 +9,12 @@ public static class GetAllAcknowledgement
 {
     public class Query : IRequest<List<AcknowledgementResponse>>
     {
+        public bool IncludeSender { get; set; }
     }
 
-    internal sealed class Handler(Client supabaseClient) : IRequestHandler<Query, List<AcknowledgementResponse>>
+    internal sealed class Handler(Client supabaseClient, ISender sender) : IRequestHandler<Query, List<AcknowledgementResponse>>
     {
+        private readonly ISender _sender = sender;
         public async Task<List<AcknowledgementResponse>> Handle(Query request, CancellationToken cancellationToken)
         {
             List<AcknowledgementResponse> acknowledgements = [];
@@ -27,6 +30,16 @@ public static class GetAllAcknowledgement
                         PropertyNameCaseInsensitive = true,
                         Converters = { new JsonStringEnumConverter() }
                     }) ?? [];
+
+            if (!request.IncludeSender) return acknowledgements;
+            
+            // Get sender profile
+            foreach (var acknowledgement in acknowledgements)
+            {
+                var profileResponse = await _sender.Send(new GetProfile.Query { Id = acknowledgement.SenderId }, cancellationToken);
+                acknowledgement.Sender = profileResponse;
+            }
+
             return acknowledgements;
         }
     }
