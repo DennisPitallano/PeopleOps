@@ -1,4 +1,5 @@
 ﻿@using PeopleOps.Web.Extensions
+@rendermode InteractiveServer
 @code
 {
   Dictionary<string, object> _tabItemAttributes = new Dictionary<string, object>
@@ -35,7 +36,7 @@
           <div style="padding:10px 0" class="border-b-dashed"></div>
           <FluentTabs ActiveTabId="@tabCommentsId" ShowActiveIndicator="false">
             <div slot="end">
-              <FluentButton Appearance="Appearance.Outline">
+              <FluentButton Appearance="Appearance.Outline" OnClick="() => LikeAcknowledgement(acknowledgement.Id)">
                 <FluentIcon Value="@(new Icons.Regular.Size16.ThumbLike())" Color="Color.Error" Slot="start"/>
                 Like
               </FluentButton>
