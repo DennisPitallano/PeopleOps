@@ -87,7 +87,7 @@ public class AcknowledgementLikeResponse
     [JsonPropertyName("id")]
     public long Id { get; set; }
     [JsonPropertyName("created_at")]
-    public DateTime CreatedAt { get; set; }
+    public DateTimeOffset CreatedAt { get; set; }
     [JsonPropertyName("acknowledgment_id")]
     public long AcknowledgmentId { get; set; }
     [JsonPropertyName("liker_id")]

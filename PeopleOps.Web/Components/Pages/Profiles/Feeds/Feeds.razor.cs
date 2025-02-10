@@ -2,7 +2,7 @@
 using PeopleOps.Web.Contracts;
 using PeopleOps.Web.Features.Acknowledgements;
 
-namespace PeopleOps.Web.Components.Pages.Profiles;
+namespace PeopleOps.Web.Components.Pages.Profiles.Feeds;
 
 public partial class Feeds : ComponentBase
 {

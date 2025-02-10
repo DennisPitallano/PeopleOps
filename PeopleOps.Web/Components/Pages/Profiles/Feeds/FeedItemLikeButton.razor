@@ -1,0 +1,30 @@
+﻿@using PeopleOps.Web.Features.Acknowledgements
+@inject ISender Sender
+@code {
+    
+    [Parameter]
+    public long AcknowledgementId { get; set; }
+    [Parameter]
+    public int ProfileId { get; set; }
+    
+    private bool IsLiked { get; set; }
+    
+    //create a callback parameter
+    [Parameter]
+    public EventCallback<bool> OnLike { get; set; }
+    
+    private async Task LikeAcknowledgement()
+    {
+        var command = new LikeAcknowledgement.Command { LikerId = ProfileId, AcknowledgementId = AcknowledgementId };
+        var result = await Sender.Send(command);
+        if (result.IsSuccess)
+        {
+            IsLiked = true;
+            await OnLike.InvokeAsync(IsLiked);
+        }
+    }
+}
+
+<FluentButton IconEnd="@(new Icons.Regular.Size16.ThumbLike())"
+              Title="Like"
+              OnClick="() => LikeAcknowledgement()" />
