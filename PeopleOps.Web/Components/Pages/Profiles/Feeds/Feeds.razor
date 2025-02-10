@@ -36,10 +36,7 @@
           <div style="padding:10px 0" class="border-b-dashed"></div>
           <FluentTabs ActiveTabId="@tabCommentsId" ShowActiveIndicator="false">
             <div slot="end">
-             <FeedItemLikeButton AcknowledgementId="acknowledgement.Id" ProfileId="Profile.Id"></FeedItemLikeButton>
-              <FluentButton IconEnd="@(new Icons.Filled.Size16.ThumbLike())"
-                            Title="Like"
-                            OnClick="() => LikeAcknowledgement(acknowledgement.Id)" />
+              <FeedItemLikeButton AcknowledgementId="acknowledgement.Id" ProfileId="Profile.Id"></FeedItemLikeButton>
             </div>
             <FluentTab Id="@tabCommentsId">
               <Header>

@@ -23,15 +23,4 @@ public partial class Feeds : ComponentBase
         var query = new GetAllAcknowledgement.Query { IncludeSender = true };
         Acknowledgements = await Sender.Send(query);
     }
-    
-    private async Task LikeAcknowledgement(long acknowledgementId)
-    {
-        var command = new LikeAcknowledgement.Command { LikerId = Profile.Id, AcknowledgementId = acknowledgementId };
-        var result = await Sender.Send(command);
-        if (result.IsSuccess)
-        {
-            await LoadAcknowledgements();
-        }
-    }
-   
 }

@@ -9,6 +9,7 @@ public static class GetAcknowledgementLikeByLikerId
     public record Query : IRequest<Result<AcknowledgementLikeResponse>>
     {
         public int LikerId { get; set; }
+        public long AcknowledgementId { get; set; }
     }
 
     internal sealed class Handler(Client supabaseClient) : IRequestHandler<Query, Result<AcknowledgementLikeResponse>>
@@ -17,7 +18,8 @@ public static class GetAcknowledgementLikeByLikerId
             CancellationToken cancellationToken)
         {
             var acknowledgementLike = await supabaseClient.From<AcknowledgementLikesTable>()
-                .Where(like => like.LikerId == request.LikerId)
+                .Where(like => like.LikerId == request.LikerId
+                               && like.AcknowledgementId == request.AcknowledgementId)
                 .Single(cancellationToken);
 
             if (acknowledgementLike is not null)
