@@ -50,6 +50,8 @@ public class AcknowledgementResponse
     
     public ProfileResponse Sender { get; set; } = new();
     
+    public AcknowledgementLikeResponse Liker { get; set; } = new();
+    
 }
 
 public class AcknowledgementTagResponse
@@ -78,4 +80,16 @@ public class AcknowledgementPointsResponse
     public int ReceiverId { get; set; }
     [JsonPropertyName("points_earned")]
     public int PointsEarned { get; set; }
+}
+
+public class AcknowledgementLikeResponse
+{
+    [JsonPropertyName("id")]
+    public long Id { get; set; }
+    [JsonPropertyName("created_at")]
+    public DateTime CreatedAt { get; set; }
+    [JsonPropertyName("acknowledgment_id")]
+    public long AcknowledgmentId { get; set; }
+    [JsonPropertyName("liker_id")]
+    public int LikerId { get; set; }
 }

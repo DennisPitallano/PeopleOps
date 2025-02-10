@@ -36,10 +36,12 @@
           <div style="padding:10px 0" class="border-b-dashed"></div>
           <FluentTabs ActiveTabId="@tabCommentsId" ShowActiveIndicator="false">
             <div slot="end">
-              <FluentButton Appearance="Appearance.Outline" OnClick="() => LikeAcknowledgement(acknowledgement.Id)">
-                <FluentIcon Value="@(new Icons.Regular.Size16.ThumbLike())" Color="Color.Error" Slot="start"/>
-                Like
-              </FluentButton>
+              <FluentButton IconEnd="@(new Icons.Regular.Size16.ThumbLike())"
+                            Title="Like"
+                            OnClick="() => LikeAcknowledgement(acknowledgement.Id)" />
+              <FluentButton IconEnd="@(new Icons.Filled.Size16.ThumbLike())"
+                            Title="Like"
+                            OnClick="() => LikeAcknowledgement(acknowledgement.Id)" />
             </div>
             <FluentTab Id="@tabCommentsId">
               <Header>
