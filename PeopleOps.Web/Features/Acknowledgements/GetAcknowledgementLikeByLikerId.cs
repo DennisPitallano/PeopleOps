@@ -8,8 +8,8 @@ public static class GetAcknowledgementLikeByLikerId
 {
     public record Query : IRequest<Result<AcknowledgementLikeResponse>>
     {
-        public int LikerId { get; set; }
-        public long AcknowledgementId { get; set; }
+        public int LikerId { get; init; }
+        public long AcknowledgementId { get; init; }
     }
 
     internal sealed class Handler(Client supabaseClient) : IRequestHandler<Query, Result<AcknowledgementLikeResponse>>
@@ -17,6 +17,11 @@ public static class GetAcknowledgementLikeByLikerId
         public async Task<Result<AcknowledgementLikeResponse>> Handle(Query request,
             CancellationToken cancellationToken)
         {
+            if (request.LikerId == 0 || request.AcknowledgementId == 0)
+            {
+                return Result.Fail<AcknowledgementLikeResponse>("Invalid request");
+            }
+            
             var acknowledgementLike = await supabaseClient.From<AcknowledgementLikesTable>()
                 .Where(like => like.LikerId == request.LikerId
                                && like.AcknowledgementId == request.AcknowledgementId)
@@ -32,7 +37,6 @@ public static class GetAcknowledgementLikeByLikerId
                     CreatedAt = acknowledgementLike.CreatedAt
                 });
             }
-
             return Result.Fail<AcknowledgementLikeResponse>("Acknowledgement like not found");
         }
     }

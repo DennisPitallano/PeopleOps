@@ -1,4 +1,5 @@
-﻿@using PeopleOps.Web.Features.Acknowledgements
+﻿@using PeopleOps.Web.Contracts
+@using PeopleOps.Web.Features.Acknowledgements
 @inject ISender Sender
 @code {
     
@@ -6,6 +7,8 @@
     public long AcknowledgementId { get; set; }
     [Parameter]
     public int ProfileId { get; set; }
+    [Parameter]
+    public AcknowledgementResponse Acknowledgement { get; set; }
     
     private bool IsLiked { get; set; }
     
@@ -13,9 +16,15 @@
     
     //create a callback parameter
     [Parameter]
-    public EventCallback<bool> OnLike { get; set; }
+    public EventCallback<AcknowledgementResponse> OnLike { get; set; }
 
     protected override async Task OnInitializedAsync()
+    {
+        await InitData();
+        await base.OnInitializedAsync();
+    }
+
+    private async Task InitData()
     {
         var query = new GetAcknowledgementLikeByLikerId.Query { LikerId = ProfileId, AcknowledgementId = AcknowledgementId };
         var result = await Sender.Send(query);
@@ -24,7 +33,6 @@
             IsLiked = result.Value.AcknowledgmentId == AcknowledgementId;
             AcknowledgementLikeId = result.Value.Id;
         }
-        await base.OnInitializedAsync();
     }
 
     private async Task LikeAcknowledgement()
@@ -36,7 +44,7 @@
             if (result.IsSuccess)
             {
                 IsLiked = false;
-                await OnLike.InvokeAsync(IsLiked);
+                await OnLike.InvokeAsync(Acknowledgement);
             }
         }
         else
@@ -46,12 +54,14 @@
             if (result.IsSuccess)
             {
                 IsLiked = true;
-                await OnLike.InvokeAsync(IsLiked);
+                AcknowledgementLikeId = result.Value.Id;
+                await OnLike.InvokeAsync(Acknowledgement);
             }
         }
     }
+
 }
 
 <FluentButton IconEnd="@(IsLiked ? new Icons.Filled.Size16.ThumbLike() : new Icons.Regular.Size16.ThumbLike())"
-              Title="Like"
+              Title="@(IsLiked ? "Unlike" : "Like")"
               OnClick="() => LikeAcknowledgement()" />

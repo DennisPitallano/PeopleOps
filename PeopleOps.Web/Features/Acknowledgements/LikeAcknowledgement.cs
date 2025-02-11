@@ -1,5 +1,7 @@
 ﻿using FluentResults;
 using PeopleOps.Web.Tables;
+using Supabase.Postgrest;
+using Client = Supabase.Client;
 
 namespace PeopleOps.Web.Features.Acknowledgements;
 
@@ -25,10 +27,10 @@ public static class LikeAcknowledgement
                 CreatedAt = DateTimeOffset.Now,
             };
             var likes = await supabaseClient.From<AcknowledgementLikesTable>()
-                .Insert(acknowledgementLikes, cancellationToken: cancellationToken).ConfigureAwait(false);
+                .Insert(acknowledgementLikes, new QueryOptions { Returning = QueryOptions.ReturnType.Representation }, cancellationToken).ConfigureAwait(false);
 
             return likes.ResponseMessage is { IsSuccessStatusCode: true }
-                ? Result.Ok(acknowledgementLikes)
+                ? Result.Ok(likes.Model?? new AcknowledgementLikesTable())
                 : Result.Fail<AcknowledgementLikesTable>("Failed to like acknowledgement");
         }
     }

@@ -348,9 +348,10 @@
 
                             </FluentGridItem>
                             <FluentGridItem xs="12" sm="8">
-                                <CascadingValue Value="ProfileResponse" Name="Profile">
-                                    <Feeds></Feeds>
-                                </CascadingValue>
+                                @if (!IsLoadingData)
+                                {
+                                    <Feeds ProfileId="ProfileResponse.Id"></Feeds>
+                                }
                             </FluentGridItem>
 
                         </FluentGrid>

@@ -47,11 +47,9 @@ public class AcknowledgementResponse
     public DateTime AcknowledgmentDate { get; set; }
     [JsonPropertyName("message")]
     public string? Message { get; set; }
-    
     public ProfileResponse Sender { get; set; } = new();
     
-    public AcknowledgementLikeResponse Liker { get; set; } = new();
-    
+    public int TotalLikes { get; set; }
 }
 
 public class AcknowledgementTagResponse

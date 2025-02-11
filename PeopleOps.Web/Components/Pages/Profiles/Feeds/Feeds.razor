@@ -1,15 +1,14 @@
 ﻿@using PeopleOps.Web.Extensions
-@rendermode InteractiveServer
 @code
 {
-  Dictionary<string, object> _tabItemAttributes = new Dictionary<string, object>
+  Dictionary<string, object> _tabItemAttributes = new()
   {
     { "style", "padding:0;" },
   };
 }
 
 <FluentGrid Justify="JustifyContent.SpaceEvenly" Spacing="2">
-  @if (Acknowledgements.Count == 0)
+  @if (IsLoading)
   {
     <FluentProgressRing ></FluentProgressRing>
   }
@@ -36,7 +35,7 @@
           <div style="padding:10px 0" class="border-b-dashed"></div>
           <FluentTabs ActiveTabId="@tabCommentsId" ShowActiveIndicator="false">
             <div slot="end">
-              <FeedItemLikeButton AcknowledgementId="acknowledgement.Id" ProfileId="Profile.Id"></FeedItemLikeButton>
+              <FeedItemLikeButton Acknowledgement="acknowledgement" OnLike="OnLike" AcknowledgementId="acknowledgement.Id" ProfileId="Profile.Id"></FeedItemLikeButton>
             </div>
             <FluentTab Id="@tabCommentsId">
               <Header>
@@ -55,7 +54,9 @@
               <Header>
                 <div class="feed-tab-item">
                   <FluentIcon Value="@(new Icons.Regular.Size16.Heart())" Color="@Color.Error"/>
-                  <span style="padding-left:5px;"> 100k Likes</span>
+                  <span style="padding-left:5px;">
+                    @acknowledgement.TotalLikes @(acknowledgement.TotalLikes > 1 ? "Likes" : "Like")
+                  </span>
                 </div>
               </Header>
               <Content>
