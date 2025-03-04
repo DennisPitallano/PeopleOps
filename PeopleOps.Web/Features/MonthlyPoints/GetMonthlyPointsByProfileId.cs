@@ -46,7 +46,9 @@ public static class GetMonthlyPointsByProfileId
                 PointsAllocated = 100, //Todo: Get from config
                 PointsSpent = 0,
                 IsRevoke = false,
-                CreatedAt = DateTime.Now
+                CreatedAt = DateTime.Now,
+                Month = todayMonth,
+                Year = todayYear
             };
 
             var baseResponse = await supabaseClient.From<MonthlyPointsTable>()
@@ -68,7 +70,9 @@ public static class GetMonthlyPointsByProfileId
                 PointsAllocated = points.PointsAllocated,
                 PointsSpent = points.PointsSpent,
                 ProfileId = points.ProfileId,
-                IsRevoke = points.IsRevoke
+                IsRevoke = points.IsRevoke,
+                Month =  points.Month,
+                Year =  points.Year
             };
     }
 }
